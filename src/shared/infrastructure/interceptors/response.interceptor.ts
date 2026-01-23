@@ -10,7 +10,10 @@ import { Request, Response } from 'express';
 import { ApiResponse } from '../../interfaces/api-response.interface';
 
 @Injectable()
-export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+export class ResponseInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponse<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -20,7 +23,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>
     const response = ctx.getResponse<Response>();
 
     return next.handle().pipe(
-      map((data) => ({
+      map((data: T) => ({
         success: true,
         statusCode: response.statusCode,
         message: this.getSuccessMessage(request.method, response.statusCode),
