@@ -45,6 +45,6 @@ export class User extends BaseEntity {
   }
 
   async validatePassword(plainPassword: string): Promise<boolean> {
-    return this.password.compare(plainPassword);
+    return await this.password.compare(plainPassword);
   }
 }

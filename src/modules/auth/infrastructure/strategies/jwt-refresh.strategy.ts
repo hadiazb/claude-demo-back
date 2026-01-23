@@ -5,6 +5,10 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { JwtPayload } from '@auth/application/services';
 
+interface RefreshTokenBody {
+  refreshToken: string;
+}
+
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
@@ -24,7 +28,10 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  async validate(req: Request, payload: JwtPayload) {
+  validate(
+    req: Request<unknown, unknown, RefreshTokenBody>,
+    payload: JwtPayload,
+  ) {
     const refreshToken = req.body.refreshToken;
     return {
       userId: payload.sub,

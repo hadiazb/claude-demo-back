@@ -33,7 +33,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
         if (Array.isArray(responseObj.message)) {
           message = responseObj.error || 'Validation failed';
-          errors = responseObj.message.map((msg) => this.parseFieldError(msg));
+          errors = responseObj.message.map(
+            (msg: string): ApiFieldError => this.parseFieldError(msg),
+          );
         } else {
           message = responseObj.message || exception.message;
         }
