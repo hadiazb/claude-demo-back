@@ -1,202 +1,202 @@
 # Claude Initial Demo API
 
-API REST desarrollada con NestJS siguiendo los principios de Clean Architecture (Hexagonal Architecture).
+REST API built with NestJS following Clean Architecture (Hexagonal Architecture) principles.
 
-## Tabla de Contenidos
+## Table of Contents
 
-- [Descripcion](#descripcion)
-- [Tecnologias](#tecnologias)
-- [Arquitectura](#arquitectura)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Requerimientos](#requerimientos)
-- [Instalacion](#instalacion)
-- [Configuracion de Variables de Entorno](#configuracion-de-variables-de-entorno)
-- [Levantamiento en Desarrollo](#levantamiento-en-desarrollo)
-- [Ambientes Disponibles](#ambientes-disponibles)
-- [Endpoints de la API](#endpoints-de-la-api)
-- [Scripts Disponibles](#scripts-disponibles)
+- [Description](#description)
+- [Technologies](#technologies)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Environment Variables Configuration](#environment-variables-configuration)
+- [Development Setup](#development-setup)
+- [Available Environments](#available-environments)
+- [API Endpoints](#api-endpoints)
+- [Available Scripts](#available-scripts)
 
-## Descripcion
+## Description
 
-Este proyecto es una API REST que implementa un sistema de autenticacion y gestion de usuarios. Incluye:
+This project is a REST API that implements an authentication and user management system. It includes:
 
-- Registro y autenticacion de usuarios (JWT)
-- Refresh tokens para sesiones persistentes
-- CRUD de usuarios
-- Estructura de respuestas estandarizada
-- Validacion de datos con class-validator
-- Manejo global de excepciones
+- User registration and authentication (JWT)
+- Refresh tokens for persistent sessions
+- User CRUD operations
+- Standardized response structure
+- Data validation with class-validator
+- Global exception handling
 
-## Tecnologias
+## Technologies
 
 ### Core
 
-| Tecnologia | Version | Descripcion |
+| Technology | Version | Description |
 |------------|---------|-------------|
-| Node.js | >= 18.x | Entorno de ejecucion |
-| NestJS | 11.0.1 | Framework backend |
-| TypeScript | 5.7.3 | Lenguaje de programacion |
-| PostgreSQL | 15+ | Base de datos relacional |
+| Node.js | >= 18.x | Runtime environment |
+| NestJS | 11.0.1 | Backend framework |
+| TypeScript | 5.7.3 | Programming language |
+| PostgreSQL | 15+ | Relational database |
 
-### Dependencias Principales
+### Main Dependencies
 
-| Libreria | Version | Descripcion |
-|----------|---------|-------------|
-| @nestjs/common | 11.0.1 | Modulo comun de NestJS |
-| @nestjs/core | 11.0.1 | Nucleo de NestJS |
-| @nestjs/config | 4.0.2 | Gestion de configuracion |
-| @nestjs/jwt | 11.0.2 | Manejo de JSON Web Tokens |
-| @nestjs/passport | 11.0.5 | Integracion con Passport.js |
-| @nestjs/typeorm | 11.0.0 | Integracion con TypeORM |
-| @nestjs/platform-express | 11.0.1 | Plataforma Express |
-| typeorm | 0.3.28 | ORM para TypeScript |
-| pg | 8.17.2 | Driver de PostgreSQL |
-| bcrypt | 6.0.0 | Hash de contrasenas |
-| class-validator | 0.14.3 | Validacion de DTOs |
-| class-transformer | 0.5.1 | Transformacion de objetos |
-| passport | 0.7.0 | Middleware de autenticacion |
-| passport-jwt | 4.0.1 | Estrategia JWT para Passport |
-| uuid | 9.0.1 | Generacion de UUIDs |
-| rxjs | 7.8.1 | Programacion reactiva |
+| Library | Version | Description |
+|---------|---------|-------------|
+| @nestjs/common | 11.0.1 | NestJS common module |
+| @nestjs/core | 11.0.1 | NestJS core |
+| @nestjs/config | 4.0.2 | Configuration management |
+| @nestjs/jwt | 11.0.2 | JSON Web Tokens handling |
+| @nestjs/passport | 11.0.5 | Passport.js integration |
+| @nestjs/typeorm | 11.0.0 | TypeORM integration |
+| @nestjs/platform-express | 11.0.1 | Express platform |
+| typeorm | 0.3.28 | TypeScript ORM |
+| pg | 8.17.2 | PostgreSQL driver |
+| bcrypt | 6.0.0 | Password hashing |
+| class-validator | 0.14.3 | DTO validation |
+| class-transformer | 0.5.1 | Object transformation |
+| passport | 0.7.0 | Authentication middleware |
+| passport-jwt | 4.0.1 | JWT strategy for Passport |
+| uuid | 9.0.1 | UUID generation |
+| rxjs | 7.8.1 | Reactive programming |
 
-### Dependencias de Desarrollo
+### Development Dependencies
 
-| Libreria | Version | Descripcion |
-|----------|---------|-------------|
-| @nestjs/cli | 11.0.0 | CLI de NestJS |
-| @nestjs/testing | 11.0.1 | Utilidades de testing |
-| jest | 29.7.0 | Framework de testing |
-| supertest | 7.0.0 | Testing de HTTP |
-| eslint | 9.18.0 | Linter de codigo |
-| prettier | 3.4.2 | Formateador de codigo |
-| ts-jest | 29.2.5 | Jest para TypeScript |
-| cross-env | 10.1.0 | Variables de entorno multiplataforma |
+| Library | Version | Description |
+|---------|---------|-------------|
+| @nestjs/cli | 11.0.0 | NestJS CLI |
+| @nestjs/testing | 11.0.1 | Testing utilities |
+| jest | 29.7.0 | Testing framework |
+| supertest | 7.0.0 | HTTP testing |
+| eslint | 9.18.0 | Code linter |
+| prettier | 3.4.2 | Code formatter |
+| ts-jest | 29.2.5 | Jest for TypeScript |
+| cross-env | 10.1.0 | Cross-platform environment variables |
 
-## Arquitectura
+## Architecture
 
-El proyecto sigue la **Arquitectura Hexagonal (Ports & Adapters)** con la siguiente organizacion:
+The project follows **Hexagonal Architecture (Ports & Adapters)** with the following organization:
 
 ```
 src/
-├── config/                 # Configuraciones (database, jwt)
-├── shared/                 # Codigo compartido
-│   ├── constants/         # Tokens de inyeccion
-│   ├── domain/            # Entidades base
-│   ├── infrastructure/    # Filtros, interceptors, decorators
-│   └── interfaces/        # Interfaces de respuesta API
+├── config/                 # Configurations (database, jwt)
+├── shared/                 # Shared code
+│   ├── constants/         # Injection tokens
+│   ├── domain/            # Base entities
+│   ├── infrastructure/    # Filters, interceptors, decorators
+│   └── interfaces/        # API response interfaces
 └── modules/
-    ├── auth/              # Modulo de autenticacion
-    │   ├── application/   # DTOs, Servicios
-    │   ├── domain/        # Entidades, Puertos
+    ├── auth/              # Authentication module
+    │   ├── application/   # DTOs, Services
+    │   ├── domain/        # Entities, Ports
     │   └── infrastructure/# Controllers, Guards, Strategies
-    └── users/             # Modulo de usuarios
-        ├── application/   # DTOs, Servicios
-        ├── domain/        # Entidades, Value Objects, Puertos
-        └── infrastructure/# Controllers, Repositorios, Mappers
+    └── users/             # Users module
+        ├── application/   # DTOs, Services
+        ├── domain/        # Entities, Value Objects, Ports
+        └── infrastructure/# Controllers, Repositories, Mappers
 ```
 
-### Capas de la Arquitectura
+### Architecture Layers
 
-| Capa | Descripcion |
-|------|-------------|
-| **Domain** | Entidades de negocio, Value Objects, interfaces de puertos |
-| **Application** | Casos de uso, DTOs, servicios de aplicacion |
-| **Infrastructure** | Controladores, repositorios, adaptadores externos |
+| Layer | Description |
+|-------|-------------|
+| **Domain** | Business entities, Value Objects, port interfaces |
+| **Application** | Use cases, DTOs, application services |
+| **Infrastructure** | Controllers, repositories, external adapters |
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 claude-initial-demo/
-├── environment/            # Archivos de configuracion por ambiente
-│   ├── .env.dev           # Desarrollo
+├── environment/            # Environment configuration files
+│   ├── .env.dev           # Development
 │   ├── .env.stg           # Staging
 │   ├── .env.uat           # UAT
-│   ├── .env.prod          # Produccion
-│   └── .env.example       # Plantilla de ejemplo
+│   ├── .env.prod          # Production
+│   └── .env.example       # Example template
 ├── src/
-│   ├── config/            # Configuraciones
-│   ├── modules/           # Modulos de la aplicacion
-│   ├── shared/            # Codigo compartido
-│   ├── app.module.ts      # Modulo principal
-│   └── main.ts            # Punto de entrada
-├── test/                  # Tests e2e
-├── docker-compose.yml     # Configuracion de Docker
-├── tsconfig.json          # Configuracion de TypeScript
-├── package.json           # Dependencias y scripts
-└── README.md              # Este archivo
+│   ├── config/            # Configurations
+│   ├── modules/           # Application modules
+│   ├── shared/            # Shared code
+│   ├── app.module.ts      # Main module
+│   └── main.ts            # Entry point
+├── test/                  # E2E tests
+├── docker-compose.yml     # Docker configuration
+├── tsconfig.json          # TypeScript configuration
+├── package.json           # Dependencies and scripts
+└── README.md              # This file
 ```
 
-## Requerimientos
+## Requirements
 
-### Software Requerido
+### Required Software
 
-| Software | Version Minima | Descripcion |
-|----------|----------------|-------------|
-| Node.js | 18.x | Entorno de ejecucion JavaScript |
-| npm | 9.x | Gestor de paquetes |
-| Docker | 20.x | Contenedores (para PostgreSQL) |
-| Docker Compose | 2.x | Orquestacion de contenedores |
+| Software | Minimum Version | Description |
+|----------|-----------------|-------------|
+| Node.js | 18.x | JavaScript runtime environment |
+| npm | 9.x | Package manager |
+| Docker | 20.x | Containers (for PostgreSQL) |
+| Docker Compose | 2.x | Container orchestration |
 
-### Verificar Instalacion
+### Verify Installation
 
 ```bash
-# Verificar Node.js
+# Verify Node.js
 node --version
 
-# Verificar npm
+# Verify npm
 npm --version
 
-# Verificar Docker
+# Verify Docker
 docker --version
 
-# Verificar Docker Compose
+# Verify Docker Compose
 docker compose version
 ```
 
-## Instalacion
+## Installation
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 
 ```bash
-git clone <url-del-repositorio>
+git clone <repository-url>
 cd claude-initial-demo
 ```
 
-### 2. Instalar dependencias
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configurar variables de entorno
+### 3. Configure environment variables
 
 ```bash
-# Copiar el archivo de ejemplo
+# Copy the example file
 cp environment/.env.example environment/.env.dev
 
-# Editar con tus configuraciones
+# Edit with your configurations
 nano environment/.env.dev
 ```
 
-## Configuracion de Variables de Entorno
+## Environment Variables Configuration
 
-### Variables Disponibles
+### Available Variables
 
-| Variable | Descripcion | Ejemplo |
+| Variable | Description | Example |
 |----------|-------------|---------|
-| `DB_HOST` | Host de la base de datos | `localhost` |
-| `DB_PORT` | Puerto de la base de datos | `5432` |
-| `DB_USERNAME` | Usuario de la base de datos | `postgres` |
-| `DB_PASSWORD` | Contrasena de la base de datos | `postgres` |
-| `DB_NAME` | Nombre de la base de datos | `claude_demo` |
-| `JWT_ACCESS_SECRET` | Secreto para access tokens | `your-secret-key` |
-| `JWT_REFRESH_SECRET` | Secreto para refresh tokens | `your-refresh-secret` |
-| `JWT_ACCESS_EXPIRES_IN` | Expiracion de access token | `15m` |
-| `JWT_REFRESH_EXPIRES_IN` | Expiracion de refresh token | `7d` |
-| `NODE_ENV` | Ambiente de ejecucion | `development` |
-| `PORT` | Puerto de la aplicacion | `3000` |
+| `DB_HOST` | Database host | `localhost` |
+| `DB_PORT` | Database port | `5432` |
+| `DB_USERNAME` | Database username | `postgres` |
+| `DB_PASSWORD` | Database password | `postgres` |
+| `DB_NAME` | Database name | `claude_demo` |
+| `JWT_ACCESS_SECRET` | Secret for access tokens | `your-secret-key` |
+| `JWT_REFRESH_SECRET` | Secret for refresh tokens | `your-refresh-secret` |
+| `JWT_ACCESS_EXPIRES_IN` | Access token expiration | `15m` |
+| `JWT_REFRESH_EXPIRES_IN` | Refresh token expiration | `7d` |
+| `NODE_ENV` | Execution environment | `development` |
+| `PORT` | Application port | `3000` |
 
-### Ejemplo de archivo .env
+### Example .env file
 
 ```env
 # Database
@@ -217,50 +217,50 @@ NODE_ENV=development
 PORT=3000
 ```
 
-## Levantamiento en Desarrollo
+## Development Setup
 
-### 1. Iniciar la base de datos con Docker
+### 1. Start the database with Docker
 
 ```bash
-# Iniciar PostgreSQL
+# Start PostgreSQL
 docker compose up -d
 
-# Verificar que el contenedor este corriendo
+# Verify the container is running
 docker ps
 ```
 
-### 2. Iniciar la aplicacion
+### 2. Start the application
 
 ```bash
-# Modo desarrollo con hot-reload
+# Development mode with hot-reload
 npm run start:dev
 ```
 
-### 3. Verificar que la aplicacion este corriendo
+### 3. Verify the application is running
 
 ```bash
-# La aplicacion estara disponible en:
+# The application will be available at:
 # http://localhost:3000/api
 
-# Probar con curl
+# Test with curl
 curl http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"Password123!","firstName":"John","lastName":"Doe"}'
 ```
 
-## Ambientes Disponibles
+## Available Environments
 
-| Ambiente | Comando | Puerto | Archivo de Config |
-|----------|---------|--------|-------------------|
+| Environment | Command | Port | Config File |
+|-------------|---------|------|-------------|
 | Development | `npm run start:dev` | 3000 | `.env.dev` |
 | Staging | `npm run start:stg` | 3001 | `.env.stg` |
 | UAT | `npm run start:uat` | 3002 | `.env.uat` |
 | Production | `npm run start:prod` | 3000 | `.env.prod` |
 
-### Cambiar de Ambiente
+### Switch Environment
 
 ```bash
-# Desarrollo
+# Development
 npm run start:dev
 
 # Staging
@@ -269,37 +269,37 @@ npm run start:stg
 # UAT
 npm run start:uat
 
-# Produccion (requiere build previo)
+# Production (requires prior build)
 npm run build
 npm run start:prod
 ```
 
-## Endpoints de la API
+## API Endpoints
 
 Base URL: `http://localhost:3000/api`
 
-### Autenticacion (`/auth`)
+### Authentication (`/auth`)
 
-| Metodo | Endpoint | Descripcion | Auth |
+| Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| POST | `/auth/register` | Registrar nuevo usuario | No |
-| POST | `/auth/login` | Iniciar sesion | No |
-| POST | `/auth/refresh` | Refrescar tokens | No |
-| POST | `/auth/logout` | Cerrar sesion | JWT |
-| POST | `/auth/logout-all` | Cerrar todas las sesiones | JWT |
+| POST | `/auth/register` | Register new user | No |
+| POST | `/auth/login` | Login | No |
+| POST | `/auth/refresh` | Refresh tokens | No |
+| POST | `/auth/logout` | Logout | JWT |
+| POST | `/auth/logout-all` | Logout from all sessions | JWT |
 
-### Usuarios (`/users`)
+### Users (`/users`)
 
-| Metodo | Endpoint | Descripcion | Auth |
+| Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/users/me` | Obtener perfil actual | JWT |
-| PATCH | `/users/me` | Actualizar perfil actual | JWT |
-| GET | `/users/:id` | Obtener usuario por ID | JWT |
-| GET | `/users` | Listar todos los usuarios | JWT |
+| GET | `/users/me` | Get current profile | JWT |
+| PATCH | `/users/me` | Update current profile | JWT |
+| GET | `/users/:id` | Get user by ID | JWT |
+| GET | `/users` | List all users | JWT |
 
-### Estructura de Respuesta
+### Response Structure
 
-**Exito:**
+**Success:**
 ```json
 {
   "success": true,
@@ -325,52 +325,52 @@ Base URL: `http://localhost:3000/api`
 }
 ```
 
-## Scripts Disponibles
+## Available Scripts
 
-| Script | Descripcion |
+| Script | Description |
 |--------|-------------|
-| `npm run start` | Iniciar en modo normal |
-| `npm run start:dev` | Iniciar en desarrollo (hot-reload) |
-| `npm run start:stg` | Iniciar en staging |
-| `npm run start:uat` | Iniciar en UAT |
-| `npm run start:prod` | Iniciar en produccion |
-| `npm run start:debug` | Iniciar en modo debug |
-| `npm run build` | Compilar el proyecto |
-| `npm run lint` | Ejecutar linter |
-| `npm run format` | Formatear codigo con Prettier |
-| `npm run test` | Ejecutar tests unitarios |
-| `npm run test:watch` | Ejecutar tests en modo watch |
-| `npm run test:cov` | Ejecutar tests con cobertura |
-| `npm run test:e2e` | Ejecutar tests end-to-end |
+| `npm run start` | Start in normal mode |
+| `npm run start:dev` | Start in development (hot-reload) |
+| `npm run start:stg` | Start in staging |
+| `npm run start:uat` | Start in UAT |
+| `npm run start:prod` | Start in production |
+| `npm run start:debug` | Start in debug mode |
+| `npm run build` | Build the project |
+| `npm run lint` | Run linter |
+| `npm run format` | Format code with Prettier |
+| `npm run test` | Run unit tests |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:cov` | Run tests with coverage |
+| `npm run test:e2e` | Run end-to-end tests |
 
 ## Docker
 
-### Comandos Utiles
+### Useful Commands
 
 ```bash
-# Iniciar contenedores
+# Start containers
 docker compose up -d
 
-# Ver logs
+# View logs
 docker compose logs -f
 
-# Detener contenedores
+# Stop containers
 docker compose down
 
-# Detener y eliminar volumenes
+# Stop and remove volumes
 docker compose down -v
 
-# Reiniciar contenedores
+# Restart containers
 docker compose restart
 ```
 
-## Contribucion
+## Contributing
 
-1. Crear una rama desde `develop`
-2. Realizar los cambios
-3. Ejecutar `npm run lint` y `npm run test`
-4. Crear un Pull Request
+1. Create a branch from `develop`
+2. Make your changes
+3. Run `npm run lint` and `npm run test`
+4. Create a Pull Request
 
-## Licencia
+## License
 
-Este proyecto es privado y de uso interno.
+This project is private and for internal use only.
