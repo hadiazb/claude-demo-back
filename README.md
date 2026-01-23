@@ -195,6 +195,8 @@ nano environment/.env.dev
 | `JWT_REFRESH_EXPIRES_IN` | Refresh token expiration | `7d` |
 | `NODE_ENV` | Execution environment | `development` |
 | `PORT` | Application port | `3000` |
+| `API_VERSION` | API version for prefix | `v1` |
+| `CORS_ORIGIN` | Allowed CORS origin | `*` |
 
 ### Example .env file
 
@@ -215,6 +217,8 @@ JWT_REFRESH_EXPIRES_IN=7d
 # App
 NODE_ENV=development
 PORT=3000
+API_VERSION=v1
+CORS_ORIGIN=*
 ```
 
 ## Development Setup
@@ -240,10 +244,10 @@ npm run start:dev
 
 ```bash
 # The application will be available at:
-# http://localhost:3000/api
+# http://localhost:3000/api/v1
 
 # Test with curl
-curl http://localhost:3000/api/auth/register \
+curl http://localhost:3000/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"Password123!","firstName":"John","lastName":"Doe"}'
 ```
@@ -276,7 +280,7 @@ npm run start:prod
 
 ## API Endpoints
 
-Base URL: `http://localhost:3000/api`
+Base URL: `http://localhost:3000/api/v1`
 
 ### Authentication (`/auth`)
 

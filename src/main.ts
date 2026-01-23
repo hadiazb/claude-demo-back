@@ -1,13 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from '@/app.module';
 import { HttpExceptionFilter, ResponseInterceptor } from '@shared';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+
+  const port = configService.get<number>('app.port') ?? 3000;
+  const apiVersion = configService.get<string>('app.apiVersion') ?? 'v1';
+  const corsOrigin = configService.get<string>('app.corsOrigin') ?? '*';
 
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: corsOrigin,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
@@ -26,11 +32,12 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix(`api/${apiVersion}`);
 
-  const port = process.env.PORT ?? 3000;
   await app.listen(port);
 
-  console.log(`Application is running on: http://localhost:${port}/api`);
+  console.log(
+    `Application is running on: http://localhost:${port}/api/${apiVersion}`,
+  );
 }
 void bootstrap();

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { databaseConfig, jwtConfig } from '@config';
+import { appConfig, databaseConfig, jwtConfig } from '@config';
 import { UsersModule } from '@users';
 import { AuthModule } from '@auth';
 
@@ -11,7 +11,7 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, jwtConfig],
+      load: [appConfig, databaseConfig, jwtConfig],
       envFilePath: envFile,
     }),
     TypeOrmModule.forRootAsync({
