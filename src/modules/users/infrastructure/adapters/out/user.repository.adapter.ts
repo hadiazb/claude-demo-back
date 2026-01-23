@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../../domain/entities/user.entity';
-import { UserRepositoryPort } from '../../../domain/ports/out/user.repository.port';
-import { UserOrmEntity } from '../../persistence/entities/user.orm-entity';
-import { UserMapper } from '../../persistence/mappers/user.mapper';
+import { User, UserRepositoryPort } from '@users/domain';
+import { UserOrmEntity, UserMapper } from '@users/infrastructure/persistence';
 
 @Injectable()
 export class UserRepositoryAdapter implements UserRepositoryPort {

@@ -16,6 +16,19 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@/*": ["src/*"],
+      "@config": ["src/config"],
+      "@config/*": ["src/config/*"],
+      "@shared": ["src/shared"],
+      "@shared/*": ["src/shared/*"],
+      "@modules": ["src/modules"],
+      "@modules/*": ["src/modules/*"],
+      "@auth": ["src/modules/auth"],
+      "@auth/*": ["src/modules/auth/*"],
+      "@users": ["src/modules/users"],
+      "@users/*": ["src/modules/users/*"]
+    }
   }
 }

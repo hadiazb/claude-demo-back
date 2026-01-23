@@ -7,15 +7,16 @@ import {
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
-import { UserService } from '../../../users/application/services/user.service';
-import { TokenRepositoryPort } from '../../domain/ports/out/token.repository.port';
-import { RefreshToken } from '../../domain/entities/refresh-token.entity';
-import { LoginCommand, AuthTokens } from '../../domain/ports/in/login.use-case';
+import { INJECTION_TOKENS } from '@shared';
+import { UserService } from '@users/application/services';
 import {
+  TokenRepositoryPort,
+  RefreshToken,
+  LoginCommand,
+  AuthTokens,
   RegisterCommand,
   RegisterResult,
-} from '../../domain/ports/in/register.use-case';
-import { INJECTION_TOKENS } from '../../../../shared/constants/injection-tokens';
+} from '@auth/domain';
 
 export interface JwtPayload {
   sub: string;

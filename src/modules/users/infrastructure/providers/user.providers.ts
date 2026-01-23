@@ -1,6 +1,6 @@
 import { Provider } from '@nestjs/common';
-import { INJECTION_TOKENS } from '../../../../shared/constants/injection-tokens';
-import { UserRepositoryAdapter } from '../adapters/out/user.repository.adapter';
+import { INJECTION_TOKENS } from '@shared';
+import { UserRepositoryAdapter } from '@users/infrastructure/adapters';
 
 export const userProviders: Provider[] = [
   {

@@ -5,13 +5,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { User, UserRole } from '../../domain/entities/user.entity';
-import { UserRepositoryPort } from '../../domain/ports/out/user.repository.port';
-import { CreateUserCommand } from '../../domain/ports/in/create-user.use-case';
-import { UpdateUserCommand } from '../../domain/ports/in/update-user.use-case';
-import { Email } from '../../domain/value-objects/email.vo';
-import { Password } from '../../domain/value-objects/password.vo';
-import { INJECTION_TOKENS } from '../../../../shared/constants/injection-tokens';
+import { INJECTION_TOKENS } from '@shared';
+import {
+  User,
+  UserRole,
+  UserRepositoryPort,
+  CreateUserCommand,
+  UpdateUserCommand,
+  Email,
+  Password,
+} from '@users/domain';
 
 @Injectable()
 export class UserService {

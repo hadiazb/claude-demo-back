@@ -1,6 +1,6 @@
-import { BaseEntity } from '../../../../shared/domain/base.entity';
-import { Email } from '../value-objects/email.vo';
-import { Password } from '../value-objects/password.vo';
+import { BaseEntity } from '@shared/domain';
+import { Email } from '@users/domain/value-objects';
+import { Password } from '@users/domain/value-objects';
 
 export enum UserRole {
   USER = 'USER',

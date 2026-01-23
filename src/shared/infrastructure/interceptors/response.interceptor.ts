@@ -7,7 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Request, Response } from 'express';
-import { ApiResponse } from '../../interfaces/api-response.interface';
+import { ApiResponse } from '@shared/interfaces';
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<

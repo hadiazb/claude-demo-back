@@ -1,7 +1,5 @@
-import { User } from '../../../domain/entities/user.entity';
-import { Email } from '../../../domain/value-objects/email.vo';
-import { Password } from '../../../domain/value-objects/password.vo';
-import { UserOrmEntity } from '../entities/user.orm-entity';
+import { User, Email, Password } from '@users/domain';
+import { UserOrmEntity } from '@users/infrastructure/persistence/entities';
 
 export class UserMapper {
   static toDomain(ormEntity: UserOrmEntity): User {

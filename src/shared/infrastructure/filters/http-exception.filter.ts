@@ -6,10 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import {
-  ApiErrorResponse,
-  ApiFieldError,
-} from '../../interfaces/api-response.interface';
+import { ApiErrorResponse, ApiFieldError } from '@shared/interfaces';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {

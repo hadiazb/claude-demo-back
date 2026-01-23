@@ -6,13 +6,15 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { AuthService } from '../../../application/services/auth.service';
-import { LoginDto } from '../../../application/dto/login.dto';
-import { RegisterDto } from '../../../application/dto/register.dto';
-import { RefreshTokenDto } from '../../../application/dto/refresh-token.dto';
-import { AuthResponseDto } from '../../../application/dto/auth-response.dto';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { CurrentUser } from '../../../../../shared/infrastructure/decorators/current-user.decorator';
+import { CurrentUser } from '@shared';
+import { AuthService } from '@auth/application/services';
+import {
+  LoginDto,
+  RegisterDto,
+  RefreshTokenDto,
+  AuthResponseDto,
+} from '@auth/application/dto';
+import { JwtAuthGuard } from '@auth/infrastructure/guards';
 
 /**
  * Authentication Controller

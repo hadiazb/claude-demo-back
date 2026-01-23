@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsEnum,
 } from 'class-validator';
-import { UserRole } from '../../../users/domain/entities/user.entity';
+import { UserRole } from '@users/domain';
 
 export class RegisterDto {
   @IsEmail()

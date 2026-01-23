@@ -7,11 +7,10 @@ import {
   UseGuards,
   NotFoundException,
 } from '@nestjs/common';
-import { UserService } from '../../../application/services/user.service';
-import { UpdateUserDto } from '../../../application/dto/update-user.dto';
-import { UserResponseDto } from '../../../application/dto/user-response.dto';
-import { JwtAuthGuard } from '../../../../auth/infrastructure/guards/jwt-auth.guard';
-import { CurrentUser } from '../../../../../shared/infrastructure/decorators/current-user.decorator';
+import { CurrentUser } from '@shared';
+import { JwtAuthGuard } from '@auth/infrastructure/guards';
+import { UserService } from '@users/application/services';
+import { UpdateUserDto, UserResponseDto } from '@users/application/dto';
 
 /**
  * REST controller for user management.

@@ -3,16 +3,17 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthController } from './infrastructure/adapters/in/auth.controller';
-import { AuthService } from './application/services/auth.service';
-import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
-import { JwtRefreshStrategy } from './infrastructure/strategies/jwt-refresh.strategy';
-import { JwtAuthGuard } from './infrastructure/guards/jwt-auth.guard';
-import { JwtRefreshGuard } from './infrastructure/guards/jwt-refresh.guard';
-import { TokenRepositoryAdapter } from './infrastructure/adapters/out/token.repository.adapter';
-import { RefreshTokenOrmEntity } from './infrastructure/persistence/entities/refresh-token.orm-entity';
-import { UsersModule } from '../users/users.module';
-import { INJECTION_TOKENS } from '../../shared/constants/injection-tokens';
+import { INJECTION_TOKENS } from '@shared';
+import { UsersModule } from '@users';
+import { AuthController } from '@auth/infrastructure/adapters';
+import { AuthService } from '@auth/application/services';
+import {
+  JwtStrategy,
+  JwtRefreshStrategy,
+} from '@auth/infrastructure/strategies';
+import { JwtAuthGuard, JwtRefreshGuard } from '@auth/infrastructure/guards';
+import { TokenRepositoryAdapter } from '@auth/infrastructure/adapters';
+import { RefreshTokenOrmEntity } from '@auth/infrastructure/persistence';
 
 @Module({
   imports: [
