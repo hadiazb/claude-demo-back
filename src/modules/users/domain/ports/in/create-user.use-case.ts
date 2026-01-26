@@ -5,6 +5,7 @@ export interface CreateUserCommand {
   password: string;
   firstName: string;
   lastName: string;
+  age: number;
   role?: UserRole;
   avatarUrl?: string;
 }

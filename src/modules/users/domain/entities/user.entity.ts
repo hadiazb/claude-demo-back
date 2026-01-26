@@ -13,6 +13,7 @@ export interface UserProps {
   password: Password;
   firstName: string;
   lastName: string;
+  age: number;
   role: UserRole;
   isActive: boolean;
   avatarUrl: string | null;
@@ -25,6 +26,7 @@ export class User extends BaseEntity {
   readonly password: Password;
   readonly firstName: string;
   readonly lastName: string;
+  readonly age: number;
   readonly role: UserRole;
   readonly isActive: boolean;
   readonly avatarUrl: string | null;
@@ -35,6 +37,7 @@ export class User extends BaseEntity {
     this.password = props.password;
     this.firstName = props.firstName;
     this.lastName = props.lastName;
+    this.age = props.age;
     this.role = props.role;
     this.isActive = props.isActive;
     this.avatarUrl = props.avatarUrl;

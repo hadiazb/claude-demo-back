@@ -4,6 +4,8 @@ import {
   MinLength,
   IsOptional,
   IsEnum,
+  IsNumber,
+  Max,
 } from 'class-validator';
 import { UserRole } from '@users/domain';
 
@@ -22,6 +24,11 @@ export class RegisterDto {
   @IsString()
   @MinLength(2)
   lastName: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Max(130)
+  age: number;
 
   @IsOptional()
   @IsEnum(UserRole)

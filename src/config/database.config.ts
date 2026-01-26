@@ -8,5 +8,7 @@ export default registerAs('database', () => ({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'claude_demo',
   autoLoadEntities: true,
-  synchronize: process.env.NODE_ENV !== 'production',
+  // IMPORTANTE: Usar false cuando trabajas con migraciones
+  // synchronize: true solo para prototipos rápidos sin datos importantes
+  synchronize: false,
 }));

@@ -9,6 +9,7 @@ export class UserMapper {
       password: Password.fromHash(ormEntity.password),
       firstName: ormEntity.firstName,
       lastName: ormEntity.lastName,
+      age: ormEntity.age,
       role: ormEntity.role,
       isActive: ormEntity.isActive,
       avatarUrl: ormEntity.avatarUrl,
@@ -24,6 +25,7 @@ export class UserMapper {
     ormEntity.password = domainEntity.password.getValue();
     ormEntity.firstName = domainEntity.firstName;
     ormEntity.lastName = domainEntity.lastName;
+    ormEntity.age = domainEntity.age;
     ormEntity.role = domainEntity.role;
     ormEntity.isActive = domainEntity.isActive;
     ormEntity.avatarUrl = domainEntity.avatarUrl;

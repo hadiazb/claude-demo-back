@@ -3,6 +3,7 @@ import { User } from '../../entities/user.entity';
 export interface UpdateUserCommand {
   firstName?: string;
   lastName?: string;
+  age?: number;
   avatarUrl?: string;
   isActive?: boolean;
 }

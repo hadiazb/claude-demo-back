@@ -63,6 +63,7 @@ export class AuthService {
       password: command.password,
       firstName: command.firstName,
       lastName: command.lastName,
+      age: command.age,
       role: command.role,
       avatarUrl: command.avatarUrl,
     });

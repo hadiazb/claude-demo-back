@@ -24,6 +24,9 @@ export class UserOrmEntity {
   @Column({ name: 'last_name' })
   lastName: string;
 
+  @Column({ name: 'age' })
+  age: number;
+
   @Column({
     type: 'enum',
     enum: UserRole,
