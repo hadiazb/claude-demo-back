@@ -1,56 +1,69 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
- * MIGRACIÓN PASO 2: Llenar datos existentes y cambiar a NOT NULL
+ * Migration Step 2: Populate existing data and change to NOT NULL.
  *
- * Esta migración:
- * 1. Actualiza todos los registros que tienen age = NULL con un valor por defecto
- * 2. Cambia la columna a NOT NULL para futuros registros
+ * This migration:
+ * 1. Updates all records that have age = NULL with a default value
+ * 2. Changes the column to NOT NULL for future records
  *
- * IMPORTANTE: En producción real, podrías querer:
- * - Usar un valor más inteligente (ej: calcular desde fecha de nacimiento)
- * - Notificar a los usuarios que actualicen su edad
- * - Usar un valor placeholder como 0 y marcarlo para revisión
+ * IMPORTANT: In a real production environment, you may want to:
+ * - Use a smarter value (e.g., calculate from birth date)
+ * - Notify users to update their age
+ * - Use a placeholder value like 0 and mark it for review
  */
 export class SetAgeDefaultAndNotNull1706300000001 implements MigrationInterface {
+  /** Unique name identifier for this migration */
   name = 'SetAgeDefaultAndNotNull1706300000001';
 
-  // Valor por defecto para registros existentes
+  /** Default value for existing records with NULL age */
   private readonly DEFAULT_AGE = 18;
 
+  /**
+   * Executes the migration to populate NULL ages and set NOT NULL constraint.
+   * Performs three steps: counts affected records, updates NULL values, and adds constraint.
+   * @param queryRunner - TypeORM query runner instance for executing database queries
+   * @returns Promise that resolves when the migration is complete
+   */
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Paso 1: Contar registros afectados (informativo)
+    // Step 1: Count affected records (informational)
     const result = await queryRunner.query(`
       SELECT COUNT(*) as count FROM "users" WHERE "age" IS NULL
     `);
     const affectedRows = result[0]?.count || 0;
-    console.log(`📊 Registros con age NULL: ${affectedRows}`);
+    console.log(`Records with NULL age: ${affectedRows}`);
 
-    // Paso 2: Actualizar registros existentes con valor por defecto
+    // Step 2: Update existing records with default value
     await queryRunner.query(`
       UPDATE "users"
       SET "age" = ${this.DEFAULT_AGE}
       WHERE "age" IS NULL
     `);
-    console.log(`✅ Registros actualizados con age = ${this.DEFAULT_AGE}`);
+    console.log(`Records updated with age = ${this.DEFAULT_AGE}`);
 
-    // Paso 3: Cambiar columna a NOT NULL
+    // Step 3: Change column to NOT NULL
     await queryRunner.query(`
       ALTER TABLE "users"
       ALTER COLUMN "age" SET NOT NULL
     `);
-    console.log('✅ Columna "age" cambiada a NOT NULL');
+    console.log('Column "age" changed to NOT NULL');
   }
 
+  /**
+   * Reverts the migration by removing the NOT NULL constraint.
+   * Note: Does not revert the age values since original NULL records are unknown.
+   * @param queryRunner - TypeORM query runner instance for executing database queries
+   * @returns Promise that resolves when the rollback is complete
+   */
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Revertir: permitir NULL nuevamente
+    // Revert: allow NULL again
     await queryRunner.query(`
       ALTER TABLE "users"
       ALTER COLUMN "age" DROP NOT NULL
     `);
-    console.log('✅ Columna "age" cambiada a NULLABLE');
+    console.log('Column "age" changed to NULLABLE');
 
-    // Nota: No revertimos los valores porque no sabemos cuáles eran NULL originalmente
-    console.log('⚠️  Los valores de age no se revierten a NULL');
+    // Note: We don't revert values because we don't know which ones were originally NULL
+    console.log('Warning: Age values are not reverted to NULL');
   }
 }

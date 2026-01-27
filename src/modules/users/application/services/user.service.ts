@@ -16,13 +16,29 @@ import {
   Password,
 } from '@users/domain';
 
+/**
+ * Application service implementing user-related use cases.
+ * Acts as an orchestrator between the domain layer and infrastructure.
+ * Implements CreateUserUseCase, FindUserUseCase, and UpdateUserUseCase.
+ */
 @Injectable()
 export class UserService {
+  /**
+   * Creates a new instance of UserService.
+   * @param userRepository - Repository port for user persistence operations, injected via DI
+   */
   constructor(
     @Inject(INJECTION_TOKENS.USER_REPOSITORY)
     private readonly userRepository: UserRepositoryPort,
   ) {}
 
+  /**
+   * Creates a new user in the system.
+   * Validates email uniqueness, creates value objects, and persists the user.
+   * @param command - Object containing the new user's data
+   * @returns Promise resolving to the newly created User entity
+   * @throws ConflictException if the email is already registered
+   */
   async createUser(command: CreateUserCommand): Promise<User> {
     const existingUser = await this.userRepository.existsByEmail(command.email);
     if (existingUser) {
@@ -47,18 +63,40 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  /**
+   * Finds a user by their unique identifier.
+   * @param id - The unique identifier of the user to find
+   * @returns Promise resolving to the User if found, or null if not found
+   */
   async findById(id: string): Promise<User | null> {
     return this.userRepository.findById(id);
   }
 
+  /**
+   * Finds a user by their email address.
+   * @param email - The email address to search for
+   * @returns Promise resolving to the User if found, or null if not found
+   */
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findByEmail(email);
   }
 
+  /**
+   * Retrieves all users from the system.
+   * @returns Promise resolving to an array of all User entities
+   */
   async findAll(): Promise<User[]> {
     return this.userRepository.findAll();
   }
 
+  /**
+   * Updates an existing user with partial data.
+   * Preserves unchanged fields and updates only the provided ones.
+   * @param id - The unique identifier of the user to update
+   * @param command - Object containing the fields to update
+   * @returns Promise resolving to the updated User entity
+   * @throws NotFoundException if the user does not exist
+   */
   async updateUser(id: string, command: UpdateUserCommand): Promise<User> {
     const existingUser = await this.userRepository.findById(id);
     if (!existingUser) {

@@ -8,8 +8,21 @@ import {
 import { Request, Response } from 'express';
 import { ApiErrorResponse, ApiFieldError } from '@shared/interfaces';
 
+/**
+ * Global exception filter that catches all exceptions thrown in the application.
+ * Transforms exceptions into a standardized API error response format.
+ *
+ * @implements {ExceptionFilter}
+ */
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  /**
+   * Catches and processes exceptions, converting them into standardized API error responses.
+   *
+   * @param {unknown} exception - The exception that was thrown
+   * @param {ArgumentsHost} host - The arguments host providing access to the request/response context
+   * @returns {void} Sends a JSON error response to the client
+   */
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -54,6 +67,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response.status(status).json(errorResponse);
   }
 
+  /**
+   * Parses an error message string to extract field information.
+   * Assumes the first word of the message is the field name.
+   *
+   * @param message - The error message string to parse
+   * @returns An ApiFieldError object containing the field name and error message
+   */
   private parseFieldError(message: string): ApiFieldError {
     const parts = message.split(' ');
     const field = parts[0] || 'unknown';

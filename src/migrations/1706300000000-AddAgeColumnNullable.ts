@@ -1,31 +1,44 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
- * MIGRACIÓN PASO 1: Agregar columna 'age' como NULLABLE
+ * Migration Step 1: Add 'age' column as NULLABLE.
  *
- * En producción, primero agregamos la columna permitiendo NULL
- * para no afectar los registros existentes.
+ * In production environments, we first add the column allowing NULL values
+ * to avoid affecting existing records.
  */
 export class AddAgeColumnNullable1706300000000 implements MigrationInterface {
+  /** Unique name identifier for this migration */
   name = 'AddAgeColumnNullable1706300000000';
 
+  /**
+   * Executes the migration to add the 'age' column.
+   * Adds an INTEGER column that allows NULL values to the users table.
+   * @param queryRunner - TypeORM query runner instance for executing database queries
+   * @returns Promise that resolves when the migration is complete
+   */
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Agregar columna age como nullable (permite NULL)
+    // Add age column as nullable (allows NULL)
     await queryRunner.query(`
       ALTER TABLE "users"
       ADD COLUMN "age" INTEGER
     `);
 
-    console.log('✅ Columna "age" agregada como NULLABLE');
+    console.log('Column "age" added as NULLABLE');
   }
 
+  /**
+   * Reverts the migration by removing the 'age' column.
+   * Drops the age column from the users table.
+   * @param queryRunner - TypeORM query runner instance for executing database queries
+   * @returns Promise that resolves when the rollback is complete
+   */
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Revertir: eliminar la columna
+    // Revert: drop the column
     await queryRunner.query(`
       ALTER TABLE "users"
       DROP COLUMN "age"
     `);
 
-    console.log('✅ Columna "age" eliminada');
+    console.log('Column "age" removed');
   }
 }
