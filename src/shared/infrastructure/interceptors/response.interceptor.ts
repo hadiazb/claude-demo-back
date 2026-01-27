@@ -3,11 +3,14 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Inject,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
 import { ApiResponse } from '@shared/interfaces';
+import { INJECTION_TOKENS } from '@shared/constants';
+import { LoggerPort, AsyncContextService } from '@shared/logging';
 
 /**
  * Global response interceptor that standardizes all HTTP responses.
@@ -21,6 +24,15 @@ export class ResponseInterceptor<T> implements NestInterceptor<
   T,
   ApiResponse<T>
 > {
+  private readonly logger: LoggerPort;
+
+  constructor(
+    @Inject(INJECTION_TOKENS.LOGGER) logger: LoggerPort,
+    private readonly asyncContext: AsyncContextService,
+  ) {
+    this.logger = logger.setContext('HTTP');
+  }
+
   /**
    * Intercepts outgoing responses and transforms them into a standardized format.
    *
@@ -36,7 +48,23 @@ export class ResponseInterceptor<T> implements NestInterceptor<
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
 
+    this.logger.http(`--> ${request.method} ${request.url}`, undefined, {
+      body: request.body,
+      query: request.query,
+      ip: request.ip,
+    });
+
     return next.handle().pipe(
+      tap(() => {
+        const startTime = this.asyncContext.getStartTime();
+        const duration = startTime ? Date.now() - startTime : 0;
+
+        this.logger.http(
+          `<-- ${request.method} ${request.url} ${response.statusCode}`,
+          undefined,
+          { duration: `${duration}ms` },
+        );
+      }),
       map((data: T) => ({
         success: true,
         statusCode: response.statusCode,

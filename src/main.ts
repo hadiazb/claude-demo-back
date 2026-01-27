@@ -2,10 +2,23 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from '@/app.module';
-import { HttpExceptionFilter, ResponseInterceptor } from '@shared';
+import {
+  HttpExceptionFilter,
+  ResponseInterceptor,
+  WinstonLoggerAdapter,
+  INJECTION_TOKENS,
+} from '@shared';
+import { LoggerPort } from '@shared/logging';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+
+  const logger = app.get<LoggerPort>(INJECTION_TOKENS.LOGGER);
+  const winstonLogger = app.get(WinstonLoggerAdapter);
+  app.useLogger(winstonLogger);
+
   const configService = app.get(ConfigService);
 
   const port = configService.get<number>('app.port') ?? 3000;
@@ -29,8 +42,8 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalInterceptors(new ResponseInterceptor());
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(app.get(ResponseInterceptor));
+  app.useGlobalFilters(app.get(HttpExceptionFilter));
 
   app.setGlobalPrefix(`api/${apiVersion}`);
 
@@ -38,6 +51,8 @@ async function bootstrap() {
 
   const appUrl = await app.getUrl();
 
-  console.log(`Application is running on: ${appUrl}/api/${apiVersion}`);
+  logger
+    .setContext('Bootstrap')
+    .info(`Application is running on: ${appUrl}/api/${apiVersion}`);
 }
 void bootstrap();

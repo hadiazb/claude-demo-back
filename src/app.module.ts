@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { appConfig, databaseConfig, jwtConfig } from '@config';
+import { appConfig, databaseConfig, jwtConfig, loggerConfig } from '@config';
+import { LoggingModule } from '@shared/logging';
 import { UsersModule } from '@users';
 import { AuthModule } from '@auth';
 
@@ -11,9 +12,10 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig],
+      load: [appConfig, databaseConfig, jwtConfig, loggerConfig],
       envFilePath: envFile,
     }),
+    LoggingModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

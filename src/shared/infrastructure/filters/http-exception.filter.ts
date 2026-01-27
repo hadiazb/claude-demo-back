@@ -4,9 +4,13 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Inject,
+  Injectable,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ApiErrorResponse, ApiFieldError } from '@shared/interfaces';
+import { INJECTION_TOKENS } from '@shared/constants';
+import { LoggerPort } from '@shared/logging';
 
 /**
  * Global exception filter that catches all exceptions thrown in the application.
@@ -14,8 +18,15 @@ import { ApiErrorResponse, ApiFieldError } from '@shared/interfaces';
  *
  * @implements {ExceptionFilter}
  */
+@Injectable()
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger: LoggerPort;
+
+  constructor(@Inject(INJECTION_TOKENS.LOGGER) logger: LoggerPort) {
+    this.logger = logger.setContext('HttpExceptionFilter');
+  }
+
   /**
    * Catches and processes exceptions, converting them into standardized API error responses.
    *
@@ -31,6 +42,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
     let errors: ApiFieldError[] | undefined;
+    let stack: string | undefined;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -53,6 +65,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
           message = responseObj.message || exception.message;
         }
       }
+
+      stack = exception.stack;
+    } else if (exception instanceof Error) {
+      message = exception.message;
+      stack = exception.stack;
     }
 
     const errorResponse: ApiErrorResponse = {
@@ -63,6 +80,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
     };
+
+    const logMetadata = {
+      statusCode: status,
+      method: request.method,
+      url: request.url,
+      body: request.body,
+    };
+
+    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.error(message, stack, logMetadata);
+    } else {
+      this.logger.warn(message, stack, logMetadata);
+    }
 
     response.status(status).json(errorResponse);
   }
