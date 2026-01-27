@@ -7,10 +7,11 @@ import {
   UseGuards,
   NotFoundException,
 } from '@nestjs/common';
-import { CurrentUser } from '@shared';
-import { JwtAuthGuard } from '@auth/infrastructure/guards';
+import { CurrentUser, Roles } from '@shared';
+import { JwtAuthGuard, RolesGuard } from '@auth/infrastructure/guards';
 import { UserService } from '@users/application/services';
 import { UpdateUserDto, UserResponseDto } from '@users/application/dto';
+import { UserRole } from '@users/domain/entities';
 
 /**
  * REST controller for user management.
@@ -85,11 +86,15 @@ export class UserController {
 
   /**
    * Retrieves all users in the system.
+   * Only accessible by users with ADMIN role.
    *
    * @route GET /users
    * @returns An array of all user profiles
+   * @throws {ForbiddenException} When user does not have ADMIN role
    */
   @Get()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.userService.findAll();
     return users.map((user) => UserResponseDto.fromDomain(user));

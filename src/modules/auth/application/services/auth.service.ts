@@ -26,6 +26,8 @@ export interface JwtPayload {
   sub: string;
   /** User's email address */
   email: string;
+  /** User's role for authorization */
+  role: string;
 }
 
 /**
@@ -73,7 +75,7 @@ export class AuthService {
       throw new UnauthorizedException('User account is disabled');
     }
 
-    return this.generateTokens(user.id, user.email.getValue());
+    return this.generateTokens(user.id, user.email.getValue(), user.role);
   }
 
   /**
@@ -99,7 +101,11 @@ export class AuthService {
       avatarUrl: command.avatarUrl,
     });
 
-    const tokens = await this.generateTokens(user.id, user.email.getValue());
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email.getValue(),
+      user.role,
+    );
 
     return {
       ...tokens,
@@ -129,7 +135,7 @@ export class AuthService {
 
     await this.tokenRepository.revokeRefreshToken(refreshToken);
 
-    return this.generateTokens(user.id, user.email.getValue());
+    return this.generateTokens(user.id, user.email.getValue(), user.role);
   }
 
   /**
@@ -158,13 +164,15 @@ export class AuthService {
    * Persists the refresh token in the repository for later validation.
    * @param userId - The unique identifier of the user
    * @param email - The user's email address
+   * @param role - The user's role for authorization
    * @returns Promise resolving to AuthTokens containing access and refresh tokens
    */
   private async generateTokens(
     userId: string,
     email: string,
+    role: string,
   ): Promise<AuthTokens> {
-    const payload = { sub: userId, email };
+    const payload: JwtPayload = { sub: userId, email, role };
 
     const accessSecret = this.configService.get<string>('jwt.accessSecret')!;
     const refreshSecret = this.configService.get<string>('jwt.refreshSecret')!;

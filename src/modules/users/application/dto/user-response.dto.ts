@@ -14,7 +14,9 @@ export class UserResponseDto {
   firstName: string;
   /** User's last name */
   lastName: string;
-  /** User's role in the system (ADMIN or USER) */
+  /** User's age */
+  age: number;
+  /** User's ole in the system (ADMIN or USER) */
   role: UserRole;
   /** Indicates whether the user account is active */
   isActive: boolean;
@@ -37,6 +39,7 @@ export class UserResponseDto {
     dto.email = user.email.getValue();
     dto.firstName = user.firstName;
     dto.lastName = user.lastName;
+    dto.age = user.age;
     dto.role = user.role;
     dto.isActive = user.isActive;
     dto.avatarUrl = user.avatarUrl;
