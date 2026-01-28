@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsNumber,
   Max,
+  Matches,
 } from 'class-validator';
 import { UserRole } from '@users/domain';
 
@@ -24,10 +25,25 @@ export class RegisterDto {
 
   /**
    * Password for the new user account.
-   * Must be a string with minimum length of 8 characters.
+   * Must meet the following requirements:
+   * - Minimum 8 characters
+   * - At least one uppercase letter
+   * - At least one lowercase letter
+   * - At least one number
+   * - At least one special character
    */
   @IsString()
-  @MinLength(8)
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @Matches(/[A-Z]/, {
+    message: 'Password must contain at least one uppercase letter',
+  })
+  @Matches(/[a-z]/, {
+    message: 'Password must contain at least one lowercase letter',
+  })
+  @Matches(/\d/, { message: 'Password must contain at least one number' })
+  @Matches(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, {
+    message: 'Password must contain at least one special character',
+  })
   password: string;
 
   /**

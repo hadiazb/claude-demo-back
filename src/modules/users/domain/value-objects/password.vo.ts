@@ -16,6 +16,18 @@ export class Password {
   /** Minimum required length for plain text passwords */
   private static readonly MIN_LENGTH = 8;
 
+  /** Regular expression for at least one uppercase letter */
+  private static readonly HAS_UPPERCASE = /[A-Z]/;
+
+  /** Regular expression for at least one lowercase letter */
+  private static readonly HAS_LOWERCASE = /[a-z]/;
+
+  /** Regular expression for at least one digit */
+  private static readonly HAS_NUMBER = /\d/;
+
+  /** Regular expression for at least one special character */
+  private static readonly HAS_SPECIAL = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
+
   /**
    * Private constructor to enforce factory method usage.
    * @param hashedValue - The already-hashed password string
@@ -25,17 +37,52 @@ export class Password {
   }
 
   /**
-   * Creates a new Password instance from a plain text password.
-   * Validates minimum length and hashes the password using bcrypt.
-   * @param plainPassword - The plain text password to hash
-   * @returns Promise resolving to a new Password instance
-   * @throws BadRequestException if password is too short or empty
+   * Validates password strength requirements.
+   * @param password - The plain text password to validate
+   * @returns Array of validation error messages, empty if valid
    */
-  static async create(plainPassword: string): Promise<Password> {
-    if (!plainPassword || plainPassword.length < Password.MIN_LENGTH) {
-      throw new BadRequestException(
+  private static validate(password: string): string[] {
+    const errors: string[] = [];
+
+    if (!password || password.length < Password.MIN_LENGTH) {
+      errors.push(
         `Password must be at least ${Password.MIN_LENGTH} characters long`,
       );
+    }
+
+    if (!Password.HAS_UPPERCASE.test(password)) {
+      errors.push('Password must contain at least one uppercase letter');
+    }
+
+    if (!Password.HAS_LOWERCASE.test(password)) {
+      errors.push('Password must contain at least one lowercase letter');
+    }
+
+    if (!Password.HAS_NUMBER.test(password)) {
+      errors.push('Password must contain at least one number');
+    }
+
+    if (!Password.HAS_SPECIAL.test(password)) {
+      errors.push(
+        'Password must contain at least one special character (!@#$%^&*()_+-=[]{};\\\':"|,.<>/?)',
+      );
+    }
+
+    return errors;
+  }
+
+  /**
+   * Creates a new Password instance from a plain text password.
+   * Validates password strength and hashes the password using bcrypt.
+   * @param plainPassword - The plain text password to hash
+   * @returns Promise resolving to a new Password instance
+   * @throws BadRequestException if password does not meet strength requirements
+   */
+  static async create(plainPassword: string): Promise<Password> {
+    const errors = Password.validate(plainPassword);
+
+    if (errors.length > 0) {
+      throw new BadRequestException(errors);
     }
 
     const hashedValue = await bcrypt.hash(plainPassword, Password.SALT_ROUNDS);
