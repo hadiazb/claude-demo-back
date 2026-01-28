@@ -14,7 +14,7 @@ export interface RegisterCommand {
   /** Last name of the new user */
   lastName: string;
   /** Age in years of the new user */
-  age: number;
+  age?: number;
   /** Optional role for the user. Defaults to USER if not specified */
   role?: UserRole;
   /** Optional URL to the user's avatar image */

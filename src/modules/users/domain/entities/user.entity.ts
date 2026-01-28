@@ -27,8 +27,8 @@ export interface UserProps {
   firstName: string;
   /** User's last name */
   lastName: string;
-  /** User's age in years */
-  age: number;
+  /** User's age in years. Can be null if not provided */
+  age: number | null;
   /** User's role for authorization */
   role: UserRole;
   /** Indicates if the user account is active */
@@ -59,8 +59,8 @@ export class User extends BaseEntity {
   /** User's last name */
   readonly lastName: string;
 
-  /** User's age in years */
-  readonly age: number;
+  /** User's age in years. Null if not provided */
+  readonly age: number | null;
 
   /** User's role for authorization (USER or ADMIN) */
   readonly role: UserRole;

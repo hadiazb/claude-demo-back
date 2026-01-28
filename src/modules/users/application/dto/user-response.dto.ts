@@ -14,8 +14,8 @@ export class UserResponseDto {
   firstName: string;
   /** User's last name */
   lastName: string;
-  /** User's age */
-  age: number;
+  /** User's age. Null if not provided */
+  age: number | null;
   /** User's ole in the system (ADMIN or USER) */
   role: UserRole;
   /** Indicates whether the user account is active */

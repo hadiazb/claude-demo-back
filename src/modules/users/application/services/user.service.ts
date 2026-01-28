@@ -54,7 +54,7 @@ export class UserService {
       password,
       firstName: command.firstName,
       lastName: command.lastName,
-      age: command.age,
+      age: command.age ?? null,
       role: command.role || UserRole.USER,
       isActive: true,
       avatarUrl: command.avatarUrl || null,

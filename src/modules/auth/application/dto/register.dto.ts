@@ -53,7 +53,7 @@ export class RegisterDto {
   @IsOptional()
   @IsNumber()
   @Max(130)
-  age: number;
+  age?: number;
 
   /**
    * Role assigned to the new user.

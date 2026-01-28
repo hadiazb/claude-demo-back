@@ -33,9 +33,9 @@ export class UserOrmEntity {
   @Column({ name: 'last_name' })
   lastName: string;
 
-  /** User's age in years */
-  @Column({ name: 'age' })
-  age: number;
+  /** User's age in years. Nullable field */
+  @Column({ name: 'age', type: 'int', nullable: true })
+  age: number | null;
 
   /** User's role for authorization. Defaults to USER */
   @Column({
