@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { AppModule } from '@/app.module';
+import { assertSecretsAreSecure } from '@config';
 import {
   HttpExceptionFilter,
   ResponseInterceptor,
@@ -12,6 +13,9 @@ import {
 import { LoggerPort } from '@shared/logging';
 
 async function bootstrap() {
+  // Validate secrets before starting the application
+  assertSecretsAreSecure();
+
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
