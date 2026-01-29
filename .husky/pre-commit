@@ -4,6 +4,10 @@ echo "🔍 Running pre-commit checks..."
 echo "📝 Running lint-staged..."
 npx lint-staged
 
+# Run full lint check on the project
+echo "🔎 Running full lint check..."
+npm run lint
+
 # Run unit tests
 echo "🧪 Running unit tests..."
 npm run test:unit

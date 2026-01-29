@@ -36,4 +36,12 @@ export default tseslint.config(
       '@typescript-eslint/no-redundant-type-constituents': 'off',
     },
   },
+  // Specific rules for test files
+  {
+    files: ['**/*.spec.ts', '**/*.test.ts', '**/test/**/*.ts'],
+    rules: {
+      // Jest mocks don't bind 'this' the same way, so this rule causes false positives
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
 );
