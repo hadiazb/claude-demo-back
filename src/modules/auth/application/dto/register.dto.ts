@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
   IsString,
@@ -20,6 +21,10 @@ export class RegisterDto {
    * Email address for the new user account.
    * Must be a valid email format.
    */
+  @ApiProperty({
+    example: 'user@example.com',
+    description: 'User email address',
+  })
   @IsEmail()
   email: string;
 
@@ -32,6 +37,11 @@ export class RegisterDto {
    * - At least one number
    * - At least one special character
    */
+  @ApiProperty({
+    example: 'SecurePass123!',
+    description:
+      'Password (min 8 chars, uppercase, lowercase, number, special char)',
+  })
   @IsString()
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
   @Matches(/[A-Z]/, {
@@ -50,6 +60,10 @@ export class RegisterDto {
    * First name of the new user.
    * Must be a string with minimum length of 2 characters.
    */
+  @ApiProperty({
+    example: 'John',
+    description: 'User first name (min 2 characters)',
+  })
   @IsString()
   @MinLength(2)
   firstName: string;
@@ -58,6 +72,10 @@ export class RegisterDto {
    * Last name of the new user.
    * Must be a string with minimum length of 2 characters.
    */
+  @ApiProperty({
+    example: 'Doe',
+    description: 'User last name (min 2 characters)',
+  })
   @IsString()
   @MinLength(2)
   lastName: string;
@@ -66,6 +84,7 @@ export class RegisterDto {
    * Age in years of the new user.
    * Optional numeric field with maximum value of 130.
    */
+  @ApiPropertyOptional({ example: 25, description: 'User age (max 130)' })
   @IsOptional()
   @IsNumber()
   @Max(130)
@@ -76,6 +95,11 @@ export class RegisterDto {
    * Optional field that defaults to USER if not specified.
    * Must be a valid UserRole enum value (USER or ADMIN).
    */
+  @ApiPropertyOptional({
+    enum: UserRole,
+    default: UserRole.USER,
+    description: 'User role',
+  })
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
@@ -84,6 +108,10 @@ export class RegisterDto {
    * URL to the user's avatar image.
    * Optional string field.
    */
+  @ApiPropertyOptional({
+    example: 'https://example.com/avatar.jpg',
+    description: 'Avatar URL',
+  })
   @IsOptional()
   @IsString()
   avatarUrl?: string;

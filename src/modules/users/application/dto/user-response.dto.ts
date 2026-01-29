@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User, UserRole } from '@users/domain';
 
 /**
@@ -7,24 +8,43 @@ import { User, UserRole } from '@users/domain';
  */
 export class UserResponseDto {
   /** Unique identifier for the user */
+  @ApiProperty({ description: 'User unique identifier' })
   id: string;
+
   /** User's email address */
+  @ApiProperty({ description: 'User email address' })
   email: string;
+
   /** User's first name */
+  @ApiProperty({ description: 'User first name' })
   firstName: string;
+
   /** User's last name */
+  @ApiProperty({ description: 'User last name' })
   lastName: string;
+
   /** User's age. Null if not provided */
+  @ApiPropertyOptional({ description: 'User age', nullable: true })
   age: number | null;
-  /** User's ole in the system (ADMIN or USER) */
+
+  /** User's role in the system (ADMIN or USER) */
+  @ApiProperty({ enum: UserRole, description: 'User role' })
   role: UserRole;
+
   /** Indicates whether the user account is active */
+  @ApiProperty({ description: 'Account active status' })
   isActive: boolean;
+
   /** URL to the user's avatar image, or null if not set */
+  @ApiPropertyOptional({ description: 'Avatar image URL', nullable: true })
   avatarUrl: string | null;
+
   /** Timestamp when the user was created */
+  @ApiProperty({ description: 'Creation timestamp' })
   createdAt: Date;
+
   /** Timestamp when the user was last updated */
+  @ApiProperty({ description: 'Last update timestamp' })
   updatedAt: Date;
 
   /**

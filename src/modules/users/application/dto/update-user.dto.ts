@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, MinLength, IsOptional, IsBoolean } from 'class-validator';
 
 /**
@@ -10,6 +11,10 @@ export class UpdateUserDto {
    * Updated first name for the user.
    * Optional field with minimum length of 2 characters.
    */
+  @ApiPropertyOptional({
+    example: 'John',
+    description: 'First name (min 2 characters)',
+  })
   @IsOptional()
   @IsString()
   @MinLength(2)
@@ -19,6 +24,10 @@ export class UpdateUserDto {
    * Updated last name for the user.
    * Optional field with minimum length of 2 characters.
    */
+  @ApiPropertyOptional({
+    example: 'Doe',
+    description: 'Last name (min 2 characters)',
+  })
   @IsOptional()
   @IsString()
   @MinLength(2)
@@ -28,6 +37,10 @@ export class UpdateUserDto {
    * Updated URL to the user's avatar image.
    * Optional string field.
    */
+  @ApiPropertyOptional({
+    example: 'https://example.com/avatar.jpg',
+    description: 'Avatar URL',
+  })
   @IsOptional()
   @IsString()
   avatarUrl?: string;
@@ -36,6 +49,7 @@ export class UpdateUserDto {
    * Updated active status for the user account.
    * Optional boolean field to enable or disable the account.
    */
+  @ApiPropertyOptional({ example: true, description: 'Account active status' })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;

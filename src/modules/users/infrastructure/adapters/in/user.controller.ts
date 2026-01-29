@@ -7,6 +7,12 @@ import {
   UseGuards,
   NotFoundException,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles } from '@shared';
 import { JwtAuthGuard, RolesGuard } from '@auth/infrastructure/guards';
 import { UserService } from '@users/application/services';
@@ -21,6 +27,8 @@ import { UserRole } from '@users/domain/entities';
  * @class UserController
  * @route /users
  */
+@ApiTags('Users')
+@ApiBearerAuth('JWT-auth')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UserController {
@@ -40,6 +48,14 @@ export class UserController {
    * @throws {NotFoundException} When the user is not found in the database
    */
   @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   async getProfile(
     @CurrentUser('userId') userId: string,
   ): Promise<UserResponseDto> {
@@ -59,6 +75,14 @@ export class UserController {
    * @returns The updated user profile data
    */
   @Patch('me')
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async updateProfile(
     @CurrentUser('userId') userId: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -76,6 +100,14 @@ export class UserController {
    * @throws {NotFoundException} When no user exists with the given ID
    */
   @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'User found',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   async findById(@Param('id') id: string): Promise<UserResponseDto> {
     const user = await this.userService.findById(id);
     if (!user) {
@@ -95,6 +127,14 @@ export class UserController {
   @Get()
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get all users (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of users',
+    type: [UserResponseDto],
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.userService.findAll();
     return users.map((user) => UserResponseDto.fromDomain(user));

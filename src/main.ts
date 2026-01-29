@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from '@/app.module';
 import { assertSecretsAreSecure } from '@config';
@@ -54,6 +55,33 @@ async function bootstrap() {
 
   app.setGlobalPrefix(`api/${apiVersion}`);
 
+  // Swagger documentation setup
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Claude Demo API')
+    .setDescription('API documentation for the Claude Demo application')
+    .setVersion(apiVersion)
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addTag('Auth', 'Authentication endpoints')
+    .addTag('Users', 'User management endpoints')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
+
   await app.listen(port);
 
   const appUrl = await app.getUrl();
@@ -61,5 +89,8 @@ async function bootstrap() {
   logger
     .setContext('Bootstrap')
     .info(`Application is running on: ${appUrl}/api/${apiVersion}`);
+  logger
+    .setContext('Bootstrap')
+    .info(`Swagger docs available at: ${appUrl}/docs`);
 }
 void bootstrap();

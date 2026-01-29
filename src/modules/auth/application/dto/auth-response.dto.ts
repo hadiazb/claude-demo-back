@@ -1,13 +1,20 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 /**
  * Data Transfer Object for authentication API responses.
  * Contains the JWT tokens issued after successful authentication.
  */
 export class AuthResponseDto {
   /** JWT access token for authenticating API requests */
+  @ApiProperty({ description: 'JWT access token (expires in 15 minutes)' })
   accessToken: string;
+
   /** JWT refresh token for obtaining new access tokens */
+  @ApiProperty({ description: 'JWT refresh token (expires in 7 days)' })
   refreshToken: string;
+
   /** Optional unique identifier of the authenticated user */
+  @ApiPropertyOptional({ description: 'User ID (only on registration)' })
   userId?: string;
 
   /**
