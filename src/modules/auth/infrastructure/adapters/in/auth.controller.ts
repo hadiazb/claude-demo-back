@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '@shared';
 import { AuthService } from '@auth/application/services';
 import {
@@ -46,6 +47,7 @@ export class AuthController {
    * @throws {ConflictException} If a user with the same email already exists
    */
   @Post('register')
+  @Throttle({ register: { limit: 10, ttl: 600000 } })
   async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
     const result = await this.authService.register(registerDto);
     return AuthResponseDto.create(
@@ -66,6 +68,7 @@ export class AuthController {
    * @throws {UnauthorizedException} If the credentials are invalid
    */
   @Post('login')
+  @Throttle({ login: { limit: 10, ttl: 300000 } })
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
     const result = await this.authService.login(loginDto);
@@ -83,6 +86,7 @@ export class AuthController {
    * @throws {UnauthorizedException} If the refresh token is invalid or expired
    */
   @Post('refresh')
+  @Throttle({ refresh: { limit: 30, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   async refresh(
     @Body() refreshTokenDto: RefreshTokenDto,

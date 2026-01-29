@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import helmet from 'helmet';
 import { AppModule } from '@/app.module';
 import {
   HttpExceptionFilter,
@@ -18,6 +19,8 @@ async function bootstrap() {
   const logger = app.get<LoggerPort>(INJECTION_TOKENS.LOGGER);
   const winstonLogger = app.get(WinstonLoggerAdapter);
   app.useLogger(winstonLogger);
+
+  app.use(helmet());
 
   const configService = app.get(ConfigService);
 

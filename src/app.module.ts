@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { appConfig, databaseConfig, jwtConfig, loggerConfig } from '@config';
 import { LoggingModule, HttpClientModule } from '@shared';
 import { UsersModule } from '@users';
@@ -15,6 +17,28 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
       load: [appConfig, databaseConfig, jwtConfig, loggerConfig],
       envFilePath: envFile,
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000,
+        limit: 200,
+      },
+      {
+        name: 'login',
+        ttl: 300000,
+        limit: 10,
+      },
+      {
+        name: 'register',
+        ttl: 600000,
+        limit: 10,
+      },
+      {
+        name: 'refresh',
+        ttl: 60000,
+        limit: 30,
+      },
+    ]),
     LoggingModule,
     HttpClientModule,
     TypeOrmModule.forRootAsync({
@@ -35,6 +59,11 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
     AuthModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
