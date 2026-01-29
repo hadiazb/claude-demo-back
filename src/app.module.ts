@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { appConfig, databaseConfig, jwtConfig, loggerConfig } from '@config';
-import { LoggingModule } from '@shared/logging';
+import { LoggingModule, HttpClientModule } from '@shared';
 import { UsersModule } from '@users';
 import { AuthModule } from '@auth';
 
@@ -16,6 +16,7 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
       envFilePath: envFile,
     }),
     LoggingModule,
+    HttpClientModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
