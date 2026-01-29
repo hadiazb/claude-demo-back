@@ -20,6 +20,7 @@ export interface ApiErrorResponse {
   statusCode: number;
   message: string;
   errors?: ApiFieldError[];
+  retryAfter?: number;
   timestamp: string;
   path: string;
 }
