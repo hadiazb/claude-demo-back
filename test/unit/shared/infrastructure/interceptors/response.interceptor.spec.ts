@@ -30,6 +30,7 @@
  */
 
 import { ExecutionContext, CallHandler } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { of } from 'rxjs';
 import { ResponseInterceptor } from '@shared/infrastructure/interceptors/response.interceptor';
 import { LoggerPort, AsyncContextService } from '@shared/logging';
@@ -44,6 +45,7 @@ describe('ResponseInterceptor', () => {
   let interceptor: ResponseInterceptor<unknown>;
   let mockLogger: jest.Mocked<LoggerPort>;
   let mockAsyncContext: jest.Mocked<AsyncContextService>;
+  let mockConfigService: jest.Mocked<ConfigService>;
   let mockExecutionContext: jest.Mocked<ExecutionContext>;
   let mockCallHandler: jest.Mocked<CallHandler>;
   let mockRequest: {
@@ -55,6 +57,7 @@ describe('ResponseInterceptor', () => {
   };
   let mockResponse: {
     statusCode: number;
+    setHeader: jest.Mock;
   };
 
   // Helper to create mock logger
@@ -87,6 +90,20 @@ describe('ResponseInterceptor', () => {
     } as unknown as jest.Mocked<AsyncContextService>;
   };
 
+  // Helper to create mock ConfigService
+  const createMockConfigService = (
+    appVersion: string = '0.1.0',
+  ): jest.Mocked<ConfigService> => {
+    return {
+      get: jest
+        .fn()
+        .mockImplementation((key: string, defaultValue?: string) => {
+          if (key === 'app.appVersion') return appVersion;
+          return defaultValue;
+        }),
+    } as unknown as jest.Mocked<ConfigService>;
+  };
+
   // Helper to create mock request
   const createMockRequest = (overrides: Partial<typeof mockRequest> = {}) => {
     return {
@@ -101,7 +118,10 @@ describe('ResponseInterceptor', () => {
 
   // Helper to create mock response
   const createMockResponse = (statusCode: number = 200) => {
-    return { statusCode };
+    return {
+      statusCode,
+      setHeader: jest.fn(),
+    };
   };
 
   // Helper to create mock ExecutionContext
@@ -136,6 +156,7 @@ describe('ResponseInterceptor', () => {
   beforeEach(() => {
     mockLogger = createMockLogger();
     mockAsyncContext = createMockAsyncContext();
+    mockConfigService = createMockConfigService();
     mockRequest = createMockRequest();
     mockResponse = createMockResponse();
     mockExecutionContext = createMockExecutionContext(
@@ -144,7 +165,11 @@ describe('ResponseInterceptor', () => {
     );
     mockCallHandler = createMockCallHandler({ id: 1, name: 'Test' });
 
-    interceptor = new ResponseInterceptor(mockLogger, mockAsyncContext);
+    interceptor = new ResponseInterceptor(
+      mockLogger,
+      mockAsyncContext,
+      mockConfigService,
+    );
   });
 
   afterEach(() => {
@@ -163,6 +188,82 @@ describe('ResponseInterceptor', () => {
 
     it('should set logger context to HTTP', () => {
       expect(mockLogger.setContext).toHaveBeenCalledWith('HTTP');
+    });
+
+    it('should read appVersion from ConfigService', () => {
+      expect(mockConfigService.get).toHaveBeenCalledWith(
+        'app.appVersion',
+        '0.0.0',
+      );
+    });
+
+    it('should use default version when config returns undefined', () => {
+      const configWithNoVersion = createMockConfigService();
+      configWithNoVersion.get.mockReturnValue(undefined);
+
+      const newInterceptor = new ResponseInterceptor(
+        mockLogger,
+        mockAsyncContext,
+        configWithNoVersion,
+      );
+
+      expect(newInterceptor).toBeInstanceOf(ResponseInterceptor);
+    });
+  });
+
+  /**
+   * =========================================================================
+   * SECTION 2B: X-APP-VERSION HEADER TESTS
+   * =========================================================================
+   */
+  describe('X-App-Version header', () => {
+    it('should set X-App-Version header on response', (done) => {
+      interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
+        complete: () => {
+          expect(mockResponse.setHeader).toHaveBeenCalledWith(
+            'X-App-Version',
+            '0.1.0',
+          );
+          done();
+        },
+      });
+    });
+
+    it('should use configured version from ConfigService', (done) => {
+      const customVersion = '2.5.3';
+      mockConfigService = createMockConfigService(customVersion);
+      mockResponse = createMockResponse();
+      mockExecutionContext = createMockExecutionContext(
+        mockRequest,
+        mockResponse,
+      );
+      interceptor = new ResponseInterceptor(
+        mockLogger,
+        mockAsyncContext,
+        mockConfigService,
+      );
+
+      interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
+        complete: () => {
+          expect(mockResponse.setHeader).toHaveBeenCalledWith(
+            'X-App-Version',
+            customVersion,
+          );
+          done();
+        },
+      });
+    });
+
+    it('should set header before processing response', (done) => {
+      interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
+        next: () => {
+          // Header should have been set by the time we receive the response
+          expect(mockResponse.setHeader).toHaveBeenCalled();
+        },
+        complete: () => {
+          done();
+        },
+      });
     });
   });
 
@@ -289,7 +390,11 @@ describe('ResponseInterceptor', () => {
     it('should log response duration when startTime is available', (done) => {
       const startTime = Date.now() - 150; // 150ms ago
       mockAsyncContext = createMockAsyncContext(startTime);
-      interceptor = new ResponseInterceptor(mockLogger, mockAsyncContext);
+      interceptor = new ResponseInterceptor(
+        mockLogger,
+        mockAsyncContext,
+        mockConfigService,
+      );
 
       interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
         complete: () => {
@@ -307,7 +412,11 @@ describe('ResponseInterceptor', () => {
 
     it('should log 0ms duration when startTime is null', (done) => {
       mockAsyncContext = createMockAsyncContext(null);
-      interceptor = new ResponseInterceptor(mockLogger, mockAsyncContext);
+      interceptor = new ResponseInterceptor(
+        mockLogger,
+        mockAsyncContext,
+        mockConfigService,
+      );
 
       interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
         complete: () => {

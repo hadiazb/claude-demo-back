@@ -5,6 +5,7 @@ import {
   CallHandler,
   Inject,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
@@ -25,12 +26,15 @@ export class ResponseInterceptor<T> implements NestInterceptor<
   ApiResponse<T>
 > {
   private readonly logger: LoggerPort;
+  private readonly appVersion: string;
 
   constructor(
     @Inject(INJECTION_TOKENS.LOGGER) logger: LoggerPort,
     private readonly asyncContext: AsyncContextService,
+    private readonly configService: ConfigService,
   ) {
     this.logger = logger.setContext('HTTP');
+    this.appVersion = this.configService.get<string>('app.appVersion', '0.0.0');
   }
 
   /**
@@ -53,6 +57,8 @@ export class ResponseInterceptor<T> implements NestInterceptor<
       query: request.query,
       ip: request.ip,
     });
+
+    response.setHeader('X-App-Version', this.appVersion);
 
     return next.handle().pipe(
       tap(() => {
