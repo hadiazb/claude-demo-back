@@ -650,4 +650,77 @@ describe('AxiosHttpClientAdapter', () => {
       );
     });
   });
+
+  /**
+   * =========================================================================
+   * SECTION 12: EDGE CASES
+   * =========================================================================
+   */
+  describe('edge cases', () => {
+    it('should handle non-axios errors without retrying', async () => {
+      const genericError = new TypeError('Cannot read property');
+      (axios.isAxiosError as unknown as jest.Mock).mockReturnValue(false);
+      mockAxiosInstance.request.mockRejectedValue(genericError);
+
+      await expect(adapter.get('/api/test', { retries: 3 })).rejects.toThrow(
+        HttpClientError,
+      );
+      // Should not retry for non-axios errors
+      expect(mockAxiosInstance.request).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle non-Error objects thrown', async () => {
+      (axios.isAxiosError as unknown as jest.Mock).mockReturnValue(false);
+      mockAxiosInstance.request.mockRejectedValue('string error');
+
+      await expect(adapter.get('/api/test', { retries: 0 })).rejects.toThrow(
+        HttpClientError,
+      );
+    });
+
+    it('should skip non-string and non-array header values', async () => {
+      mockAxiosInstance.request.mockResolvedValue(
+        createMockResponse({}, 200, 'OK', {
+          'content-type': 'application/json',
+          'x-number': 123,
+          'x-object': { nested: 'value' },
+          'x-null': null,
+        }),
+      );
+
+      const result = await adapter.get('/api/test');
+
+      expect(result.headers['content-type']).toBe('application/json');
+      expect(result.headers['x-number']).toBeUndefined();
+      expect(result.headers['x-object']).toBeUndefined();
+      expect(result.headers['x-null']).toBeUndefined();
+    });
+
+    it('should handle empty config gracefully', async () => {
+      mockAxiosInstance.request.mockResolvedValue(createMockResponse({}));
+
+      const result = await adapter.get('/api/test', {});
+
+      expect(result.status).toBe(200);
+    });
+
+    it('should use default retries when not specified', async () => {
+      const axiosError = createMockAxiosError('Server error', 500);
+      (axios.isAxiosError as unknown as jest.Mock).mockReturnValue(true);
+      mockAxiosInstance.request
+        .mockRejectedValueOnce(axiosError)
+        .mockRejectedValueOnce(axiosError)
+        .mockRejectedValueOnce(axiosError)
+        .mockResolvedValueOnce(createMockResponse({}));
+
+      const resultPromise = adapter.get('/api/test');
+
+      await jest.runAllTimersAsync();
+
+      const result = await resultPromise;
+      expect(result.status).toBe(200);
+      // Default 3 retries + initial = 4 calls max
+      expect(mockAxiosInstance.request).toHaveBeenCalledTimes(4);
+    });
+  });
 });

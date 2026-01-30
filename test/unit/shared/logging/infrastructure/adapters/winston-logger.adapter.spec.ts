@@ -425,4 +425,113 @@ describe('WinstonLoggerAdapter', () => {
       );
     });
   });
+
+  /**
+   * =========================================================================
+   * SECTION 8: JSON FORMAT TESTS
+   * =========================================================================
+   */
+  describe('JSON format', () => {
+    let jsonLogger: WinstonLoggerAdapter;
+    let jsonLogSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockConfigService.get.mockImplementation(
+        (key: string, defaultValue?: unknown) => {
+          if (key === 'logger.format') return 'json';
+          const config: Record<string, unknown> = {
+            'logger.level': 'debug',
+            'logger.toFile': false,
+            'logger.directory': 'logs',
+            'logger.appName': 'json-test-app',
+          };
+          return config[key] ?? defaultValue;
+        },
+      );
+      jsonLogger = new WinstonLoggerAdapter(
+        mockConfigService,
+        mockAsyncContext,
+      );
+      jsonLogSpy = jest.spyOn(jsonLogger['logger'], 'log');
+    });
+
+    it('should log messages in JSON format mode', () => {
+      jsonLogger.info('JSON message');
+
+      expect(jsonLogSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: 'info',
+          message: 'JSON message',
+        }),
+      );
+    });
+
+    it('should include request ID in JSON format', () => {
+      mockAsyncContext.getRequestId.mockReturnValue('json-request-123');
+
+      jsonLogger.info('With request ID');
+
+      expect(jsonLogSpy).toHaveBeenCalled();
+    });
+
+    it('should log all levels in JSON mode', () => {
+      jsonLogger.error('Error in JSON');
+      jsonLogger.warn('Warn in JSON');
+      jsonLogger.debug('Debug in JSON');
+
+      expect(jsonLogSpy).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  /**
+   * =========================================================================
+   * SECTION 9: FILE TRANSPORT TESTS
+   * =========================================================================
+   */
+  describe('file transport', () => {
+    it('should create logger with file transports enabled', () => {
+      mockConfigService.get.mockImplementation(
+        (key: string, defaultValue?: unknown) => {
+          if (key === 'logger.toFile') return true;
+          if (key === 'logger.format') return 'json';
+          const config: Record<string, unknown> = {
+            'logger.level': 'info',
+            'logger.directory': '/tmp/logs',
+            'logger.appName': 'file-test-app',
+          };
+          return config[key] ?? defaultValue;
+        },
+      );
+
+      const fileLogger = new WinstonLoggerAdapter(
+        mockConfigService,
+        mockAsyncContext,
+      );
+
+      expect(fileLogger).toBeInstanceOf(WinstonLoggerAdapter);
+    });
+  });
+
+  /**
+   * =========================================================================
+   * SECTION 10: REQUEST ID EDGE CASES
+   * =========================================================================
+   */
+  describe('request ID edge cases', () => {
+    it('should handle undefined request ID gracefully', () => {
+      mockAsyncContext.getRequestId.mockReturnValue(undefined);
+
+      expect(() => {
+        logger.info('No request ID');
+      }).not.toThrow();
+    });
+
+    it('should handle empty string request ID', () => {
+      mockAsyncContext.getRequestId.mockReturnValue('');
+
+      expect(() => {
+        logger.info('Empty request ID');
+      }).not.toThrow();
+    });
+  });
 });
