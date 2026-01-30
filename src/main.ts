@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
 import helmet from 'helmet';
 import { AppModule } from '@/app.module';
 import { assertSecretsAreSecure } from '@config';
@@ -22,6 +23,20 @@ async function bootstrap() {
   });
 
   const logger = app.get<LoggerPort>(INJECTION_TOKENS.LOGGER);
+
+  // Run migrations automatically if RUN_MIGRATIONS is set to 'true'
+  if (process.env.RUN_MIGRATIONS === 'true') {
+    const dataSource = app.get(DataSource);
+    logger.setContext('Migrations').info('Running pending migrations...');
+    const migrations = await dataSource.runMigrations();
+    if (migrations.length > 0) {
+      logger
+        .setContext('Migrations')
+        .info(`Executed ${migrations.length} migration(s)`);
+    } else {
+      logger.setContext('Migrations').info('No pending migrations');
+    }
+  }
   const winstonLogger = app.get(WinstonLoggerAdapter);
   app.useLogger(winstonLogger);
 
