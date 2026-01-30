@@ -1,31 +1,79 @@
 # Instrucciones del Proyecto
 
-## Formato de Commits
+## Formato de Commits (Conventional Commits)
 
 Usar el siguiente formato para todos los mensajes de commit:
 
 ```
-#NNN | YYYY-MM-DD HH:MM (COT) | Descripción breve
+tipo(alcance): descripción corta
 
 Descripción detallada (opcional)
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+BREAKING CHANGE: descripción (si aplica)
 ```
 
-### Ejemplo:
+### Tipos disponibles
+
+| Tipo | Descripción | Bump de versión |
+|------|-------------|-----------------|
+| `feat` | Nueva funcionalidad | MINOR (0.X.0) |
+| `fix` | Corrección de bug | PATCH (0.0.X) |
+| `docs` | Documentación | - |
+| `style` | Formato, espacios | - |
+| `refactor` | Refactorización | - |
+| `test` | Agregar tests | - |
+| `chore` | Mantenimiento | - |
+| `perf` | Mejoras rendimiento | PATCH (0.0.X) |
+| `ci` | CI/CD | - |
+| `build` | Build/dependencias | - |
+| `revert` | Revertir commit | - |
+
+### Ejemplos
+
+```bash
+# Feature nueva
+feat(auth): add password reset functionality
+
+# Bug fix
+fix(users): resolve email validation error
+
+# Con alcance opcional
+docs: update API documentation
+
+# Breaking change (bump MAJOR)
+feat(api): change response format
+
+BREAKING CHANGE: API responses now use camelCase instead of snake_case
 ```
-#033 | 2026-01-30 14:30 (COT) | Add user profile feature
 
-Implement user profile endpoint with avatar upload support.
+### Alcances comunes (scope)
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+- `auth` - Módulo de autenticación
+- `users` - Módulo de usuarios
+- `api` - API general
+- `deps` - Dependencias
+- `config` - Configuración
+
+## Versionamiento
+
+Este proyecto usa **Semantic Versioning** con **standard-version**.
+
+### Comandos de release
+
+```bash
+npm run release        # Automático según commits
+npm run release:patch  # Forzar 0.0.X
+npm run release:minor  # Forzar 0.X.0
+npm run release:major  # Forzar X.0.0
+npm run release:dry    # Simular (sin cambios)
 ```
 
-### Notas:
-- **NNN**: Número secuencial del commit (consultar `git log --oneline -1` para el último)
-- **COT**: Zona horaria Colombia (UTC-5)
-- La descripción breve debe ser concisa y en inglés
-- Siempre incluir el Co-Authored-By al final
+### Flujo de release
+
+1. Desarrollar en `develop` con commits convencionales
+2. Merge a `main` cuando esté listo
+3. Ejecutar `npm run release` en `main`
+4. Push con tags: `git push --follow-tags origin main`
 
 ## Arquitectura
 
@@ -51,4 +99,5 @@ npm run start:dev     # Desarrollo
 npm run lint          # Linter
 npm run test:unit     # Tests unitarios
 npm run test:cov      # Coverage
+npm run release:dry   # Simular release
 ```

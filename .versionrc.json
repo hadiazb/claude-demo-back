@@ -1,0 +1,18 @@
+{
+  "types": [
+    { "type": "feat", "section": "✨ Features" },
+    { "type": "fix", "section": "🐛 Bug Fixes" },
+    { "type": "perf", "section": "⚡ Performance" },
+    { "type": "refactor", "section": "♻️ Refactoring" },
+    { "type": "docs", "section": "📚 Documentation" },
+    { "type": "test", "section": "✅ Tests" },
+    { "type": "chore", "section": "🔧 Maintenance", "hidden": false },
+    { "type": "ci", "section": "👷 CI/CD", "hidden": false },
+    { "type": "build", "section": "📦 Build", "hidden": false },
+    { "type": "style", "hidden": true },
+    { "type": "revert", "section": "⏪ Reverts" }
+  ],
+  "commitUrlFormat": "{{host}}/{{owner}}/{{repository}}/commit/{{hash}}",
+  "compareUrlFormat": "{{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}",
+  "releaseCommitMessageFormat": "chore(release): v{{currentTag}}"
+}
