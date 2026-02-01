@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/hadiazb/claude-demo-back/compare/v0.1.0...v0.2.0) (2026-02-01)
+
+
+### ✨ Features
+
+* **api:** add X-App-Version header to responses ([cb27c85](https://github.com/hadiazb/claude-demo-back/commit/cb27c853e2a42fa5ee22fc2574978de7284d9487))
+* **db:** consolidate migrations and add auto-run on startup ([f49574d](https://github.com/hadiazb/claude-demo-back/commit/f49574d331885ff5731ba64051e971f027f8a14f))
+* **email:** integrate Resend for registration notifications ([a481a29](https://github.com/hadiazb/claude-demo-back/commit/a481a2993f65dbd4d7bcfd65d25127814ae82552))
+
 ## [0.1.0] - 2026-01-30
 
 ### ✨ Features
