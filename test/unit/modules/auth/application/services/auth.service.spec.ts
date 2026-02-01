@@ -28,6 +28,8 @@ import { RefreshToken } from '@auth/domain/entities/refresh-token.entity';
 import { User, UserRole } from '@users/domain/entities/user.entity';
 import { Email } from '@users/domain/value-objects/email.vo';
 import { Password } from '@users/domain/value-objects/password.vo';
+import { EmailPort } from '@shared/email';
+import { LoggerPort } from '@shared/logging';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -35,6 +37,8 @@ describe('AuthService', () => {
   let mockJwtService: jest.Mocked<JwtService>;
   let mockConfigService: jest.Mocked<ConfigService>;
   let mockTokenRepository: jest.Mocked<TokenRepositoryPort>;
+  let mockEmailService: jest.Mocked<EmailPort>;
+  let mockLogger: jest.Mocked<LoggerPort>;
 
   // Helper to create mocks
   const createMocks = () => {
@@ -64,6 +68,25 @@ describe('AuthService', () => {
       revokeAllUserTokens: jest.fn(),
       deleteExpiredTokens: jest.fn(),
     };
+
+    mockEmailService = {
+      send: jest
+        .fn()
+        .mockResolvedValue({ success: true, messageId: 'msg-123' }),
+      sendWelcomeEmail: jest
+        .fn()
+        .mockResolvedValue({ success: true, messageId: 'welcome-123' }),
+    };
+
+    mockLogger = {
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      http: jest.fn(),
+      debug: jest.fn(),
+      verbose: jest.fn(),
+      setContext: jest.fn().mockReturnThis(),
+    } as jest.Mocked<LoggerPort>;
   };
 
   // Helper to create a mock User
@@ -127,6 +150,8 @@ describe('AuthService', () => {
       mockJwtService,
       mockConfigService,
       mockTokenRepository,
+      mockEmailService,
+      mockLogger,
     );
   });
 

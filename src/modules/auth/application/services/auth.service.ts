@@ -8,6 +8,8 @@ import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { INJECTION_TOKENS } from '@shared';
+import { EmailPort } from '@shared/email';
+import { LoggerPort } from '@shared/logging';
 import { UserService } from '@users/application/services';
 import {
   TokenRepositoryPort,
@@ -37,12 +39,16 @@ export interface JwtPayload {
  */
 @Injectable()
 export class AuthService {
+  private readonly logger: LoggerPort;
+
   /**
    * Creates a new instance of AuthService.
    * @param userService - Service for user-related operations
    * @param jwtService - NestJS JWT service for token generation and verification
    * @param configService - NestJS config service for accessing JWT secrets
    * @param tokenRepository - Repository port for refresh token persistence
+   * @param emailService - Email service for sending notifications
+   * @param logger - Logger for tracking operations
    */
   constructor(
     private readonly userService: UserService,
@@ -50,7 +56,12 @@ export class AuthService {
     private readonly configService: ConfigService,
     @Inject(INJECTION_TOKENS.TOKEN_REPOSITORY)
     private readonly tokenRepository: TokenRepositoryPort,
-  ) {}
+    @Inject(INJECTION_TOKENS.EMAIL)
+    private readonly emailService: EmailPort,
+    @Inject(INJECTION_TOKENS.LOGGER) logger: LoggerPort,
+  ) {
+    this.logger = logger.setContext('AuthService');
+  }
 
   /**
    * Authenticates a user with email and password credentials.
@@ -107,10 +118,42 @@ export class AuthService {
       user.role,
     );
 
+    // Send welcome email asynchronously (don't block registration)
+    this.sendWelcomeEmail(user.email.getValue(), user.firstName);
+
     return {
       ...tokens,
       userId: user.id,
     };
+  }
+
+  /**
+   * Sends a welcome email to a newly registered user.
+   * This method runs asynchronously and doesn't block the registration process.
+   * @param email - User's email address
+   * @param firstName - User's first name for personalization
+   */
+  private sendWelcomeEmail(email: string, firstName: string): void {
+    this.emailService
+      .sendWelcomeEmail(email, firstName)
+      .then((result) => {
+        if (result.success) {
+          this.logger.info('Welcome email sent', undefined, {
+            email,
+            messageId: result.messageId,
+          });
+        } else {
+          this.logger.warn('Failed to send welcome email', undefined, {
+            email,
+            error: result.error,
+          });
+        }
+      })
+      .catch((error) => {
+        this.logger.error('Error sending welcome email', error.message, {
+          email,
+        });
+      });
   }
 
   /**
