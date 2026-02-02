@@ -32,16 +32,23 @@ export class RedisCacheAdapter
   onModuleInit(): void {
     const redisUrl = this.configService.get<string>('cache.url');
 
+    const retryStrategy = (times: number): number | null => {
+      if (times > 3) {
+        this.logger.error('Redis connection failed after 3 retries');
+        return null;
+      }
+      return Math.min(times * 200, 2000);
+    };
+
     if (redisUrl) {
+      const usesTls = redisUrl.startsWith('rediss://');
+      this.logger.info(`Connecting to Redis${usesTls ? ' with TLS' : ''}...`);
+
       this.client = new Redis(redisUrl, {
         keyPrefix: this.keyPrefix,
-        retryStrategy: (times) => {
-          if (times > 3) {
-            this.logger.error('Redis connection failed after 3 retries');
-            return null;
-          }
-          return Math.min(times * 200, 2000);
-        },
+        retryStrategy,
+        tls: usesTls ? { rejectUnauthorized: false } : undefined,
+        maxRetriesPerRequest: 3,
       });
     } else {
       this.client = new Redis({
@@ -49,13 +56,8 @@ export class RedisCacheAdapter
         port: this.configService.get<number>('cache.port', 6379),
         password: this.configService.get<string>('cache.password'),
         keyPrefix: this.keyPrefix,
-        retryStrategy: (times) => {
-          if (times > 3) {
-            this.logger.error('Redis connection failed after 3 retries');
-            return null;
-          }
-          return Math.min(times * 200, 2000);
-        },
+        retryStrategy,
+        maxRetriesPerRequest: 3,
       });
     }
 
@@ -64,7 +66,10 @@ export class RedisCacheAdapter
     });
 
     this.client.on('error', (error) => {
-      this.logger.error('Redis connection error', error.message);
+      this.logger.error(
+        'Redis connection error',
+        error instanceof Error ? error.stack : String(error),
+      );
     });
 
     this.client.on('close', () => {
