@@ -4,4 +4,5 @@ export const INJECTION_TOKENS = {
   LOGGER: 'LOGGER',
   HTTP_CLIENT: 'HTTP_CLIENT',
   EMAIL: 'EMAIL',
+  CACHE: 'CACHE',
 } as const;

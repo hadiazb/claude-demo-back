@@ -9,8 +9,14 @@ import {
   jwtConfig,
   loggerConfig,
   emailConfig,
+  cacheConfig,
 } from '@config';
-import { LoggingModule, HttpClientModule, EmailModule } from '@shared';
+import {
+  LoggingModule,
+  HttpClientModule,
+  EmailModule,
+  CacheModule,
+} from '@shared';
 import { UsersModule } from '@users';
 import { AuthModule } from '@auth';
 
@@ -20,7 +26,14 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig, loggerConfig, emailConfig],
+      load: [
+        appConfig,
+        databaseConfig,
+        jwtConfig,
+        loggerConfig,
+        emailConfig,
+        cacheConfig,
+      ],
       envFilePath: envFile,
     }),
     ThrottlerModule.forRoot([
@@ -48,6 +61,7 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
     LoggingModule,
     HttpClientModule,
     EmailModule,
+    CacheModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
