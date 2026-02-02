@@ -29,6 +29,16 @@ export class RedisCacheAdapter
     this.defaultTtl = this.configService.get<number>('cache.defaultTtl', 3600);
   }
 
+  private maskUrl(url: string): string {
+    try {
+      const parsed = new URL(url);
+      const maskedPassword = parsed.password ? '****' : '';
+      return `${parsed.protocol}//${parsed.username}:${maskedPassword}@${parsed.host}`;
+    } catch {
+      return 'invalid-url';
+    }
+  }
+
   onModuleInit(): void {
     const redisUrl = this.configService.get<string>('cache.url');
 
@@ -42,7 +52,9 @@ export class RedisCacheAdapter
 
     if (redisUrl) {
       const usesTls = redisUrl.startsWith('rediss://');
-      this.logger.info(`Connecting to Redis${usesTls ? ' with TLS' : ''}...`);
+      this.logger.info(
+        `Connecting to Redis: ${this.maskUrl(redisUrl)} (TLS: ${usesTls})`,
+      );
 
       this.client = new Redis(redisUrl, {
         keyPrefix: this.keyPrefix,
@@ -51,9 +63,15 @@ export class RedisCacheAdapter
         maxRetriesPerRequest: 3,
       });
     } else {
+      const host = this.configService.get<string>('cache.host', 'localhost');
+      const port = this.configService.get<number>('cache.port', 6379);
+      this.logger.info(
+        `Connecting to Redis: ${host}:${port} (no URL provided)`,
+      );
+
       this.client = new Redis({
-        host: this.configService.get<string>('cache.host', 'localhost'),
-        port: this.configService.get<number>('cache.port', 6379),
+        host,
+        port,
         password: this.configService.get<string>('cache.password'),
         keyPrefix: this.keyPrefix,
         retryStrategy,
