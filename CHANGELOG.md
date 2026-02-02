@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.3](https://github.com/hadiazb/claude-demo-back/compare/v0.3.2...v0.3.3) (2026-02-02)
+
+
+### 🐛 Bug Fixes
+
+* **cache:** add diagnostic logging for Redis connection issues ([8d83ed7](https://github.com/hadiazb/claude-demo-back/commit/8d83ed79049a505cd8e20cb7dd3132f898d3b4ba))
+
 ### [0.3.2](https://github.com/hadiazb/claude-demo-back/compare/v0.3.1...v0.3.2) (2026-02-02)
 
 
