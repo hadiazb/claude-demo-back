@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserRepositoryPort } from '@users/domain';
+import { User, UserRepositoryPort, UserRole } from '@users/domain';
 import { UserOrmEntity, UserMapper } from '@users/infrastructure/persistence';
 
 /**
@@ -94,5 +94,15 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
       where: { email: email.toLowerCase() },
     });
     return count > 0;
+  }
+
+  /**
+   * Counts the number of users with a specific role.
+   * Used for business rule validation (e.g., preventing last admin demotion).
+   * @param role - The role to count users for
+   * @returns Promise resolving to the count of users with the specified role
+   */
+  async countByRole(role: UserRole): Promise<number> {
+    return this.userRepository.count({ where: { role } });
   }
 }

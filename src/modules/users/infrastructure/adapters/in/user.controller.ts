@@ -16,7 +16,11 @@ import {
 import { CurrentUser, Roles } from '@shared';
 import { JwtAuthGuard, RolesGuard } from '@auth/infrastructure/guards';
 import { UserService } from '@users/application/services';
-import { UpdateUserDto, UserResponseDto } from '@users/application/dto';
+import {
+  UpdateUserDto,
+  UpdateRoleDto,
+  UserResponseDto,
+} from '@users/application/dto';
 import { UserRole } from '@users/domain/entities';
 
 /**
@@ -88,6 +92,50 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserResponseDto> {
     const user = await this.userService.updateUser(userId, updateUserDto);
+    return UserResponseDto.fromDomain(user);
+  }
+
+  /**
+   * Updates a user's role.
+   * Only accessible by users with ADMIN role.
+   * Business rules:
+   * - Cannot change your own role
+   * - Cannot demote the last admin in the system
+   *
+   * @route PATCH /users/:id/role
+   * @param id - The unique identifier of the user whose role will be changed
+   * @param updateRoleDto - DTO containing the new role
+   * @param requestingUserId - The ID of the admin making the request
+   * @returns The updated user profile data
+   * @throws {NotFoundException} When no user exists with the given ID
+   * @throws {ForbiddenException} When business rules are violated
+   */
+  @Patch(':id/role')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Update user role (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'User role updated',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin role required or business rule violation',
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async updateRole(
+    @Param('id') id: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+    @CurrentUser('userId') requestingUserId: string,
+  ): Promise<UserResponseDto> {
+    const user = await this.userService.updateUserRole(
+      id,
+      updateRoleDto.role,
+      requestingUserId,
+    );
     return UserResponseDto.fromDomain(user);
   }
 

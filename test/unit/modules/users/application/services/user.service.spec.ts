@@ -16,7 +16,11 @@
  * Mock UserRepositoryPort and verify service behavior.
  */
 
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { UserService } from '@users/application/services/user.service';
 import { UserRepositoryPort } from '@users/domain/ports/out/user.repository.port';
 import { User, UserRole } from '@users/domain/entities/user.entity';
@@ -37,6 +41,7 @@ describe('UserService', () => {
       update: jest.fn(),
       delete: jest.fn(),
       existsByEmail: jest.fn(),
+      countByRole: jest.fn(),
     };
   };
 
@@ -414,7 +419,141 @@ describe('UserService', () => {
 
   /**
    * =========================================================================
-   * SECTION 6: ERROR HANDLING
+   * SECTION 6: UPDATE USER ROLE TESTS
+   * =========================================================================
+   */
+  describe('updateUserRole', () => {
+    const adminUser = () =>
+      createUser({ id: 'admin-123', role: UserRole.ADMIN });
+    const regularUser = () =>
+      createUser({ id: 'user-456', role: UserRole.USER });
+
+    it('should update user role successfully', async () => {
+      const targetUser = regularUser();
+      mockUserRepository.findById.mockResolvedValue(targetUser);
+      mockUserRepository.update.mockImplementation((user) =>
+        Promise.resolve(user),
+      );
+
+      const result = await service.updateUserRole(
+        'user-456',
+        UserRole.ADMIN,
+        'admin-123',
+      );
+
+      expect(result.role).toBe(UserRole.ADMIN);
+      expect(mockUserRepository.update).toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when trying to change own role', async () => {
+      await expect(
+        service.updateUserRole('admin-123', UserRole.USER, 'admin-123'),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.updateUserRole('admin-123', UserRole.USER, 'admin-123'),
+      ).rejects.toThrow('Cannot change your own role');
+    });
+
+    it('should throw NotFoundException when target user not found', async () => {
+      mockUserRepository.findById.mockResolvedValue(null);
+
+      await expect(
+        service.updateUserRole('non-existent', UserRole.ADMIN, 'admin-123'),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.updateUserRole('non-existent', UserRole.ADMIN, 'admin-123'),
+      ).rejects.toThrow('User not found');
+    });
+
+    it('should throw ForbiddenException when demoting the last admin', async () => {
+      const lastAdmin = adminUser();
+      mockUserRepository.findById.mockResolvedValue(lastAdmin);
+      mockUserRepository.countByRole.mockResolvedValue(1);
+
+      await expect(
+        service.updateUserRole('admin-123', UserRole.USER, 'other-admin'),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.updateUserRole('admin-123', UserRole.USER, 'other-admin'),
+      ).rejects.toThrow('Cannot demote the last admin');
+    });
+
+    it('should allow demoting admin when there are multiple admins', async () => {
+      const admin = adminUser();
+      mockUserRepository.findById.mockResolvedValue(admin);
+      mockUserRepository.countByRole.mockResolvedValue(2);
+      mockUserRepository.update.mockImplementation((user) =>
+        Promise.resolve(user),
+      );
+
+      const result = await service.updateUserRole(
+        'admin-123',
+        UserRole.USER,
+        'other-admin',
+      );
+
+      expect(result.role).toBe(UserRole.USER);
+    });
+
+    it('should return user without changes if role is the same', async () => {
+      const user = regularUser();
+      mockUserRepository.findById.mockResolvedValue(user);
+
+      const result = await service.updateUserRole(
+        'user-456',
+        UserRole.USER,
+        'admin-123',
+      );
+
+      expect(result).toBe(user);
+      expect(mockUserRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('should not check admin count when promoting user to admin', async () => {
+      const user = regularUser();
+      mockUserRepository.findById.mockResolvedValue(user);
+      mockUserRepository.update.mockImplementation((u) => Promise.resolve(u));
+
+      await service.updateUserRole('user-456', UserRole.ADMIN, 'admin-123');
+
+      expect(mockUserRepository.countByRole).not.toHaveBeenCalled();
+    });
+
+    it('should check own role before fetching user', async () => {
+      await expect(
+        service.updateUserRole('admin-123', UserRole.USER, 'admin-123'),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockUserRepository.findById).not.toHaveBeenCalled();
+    });
+
+    it('should preserve other user properties when updating role', async () => {
+      const user = createUser({
+        id: 'user-456',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        role: UserRole.USER,
+      });
+      mockUserRepository.findById.mockResolvedValue(user);
+      mockUserRepository.update.mockImplementation((u) => Promise.resolve(u));
+
+      const result = await service.updateUserRole(
+        'user-456',
+        UserRole.ADMIN,
+        'admin-123',
+      );
+
+      expect(result.firstName).toBe('John');
+      expect(result.lastName).toBe('Doe');
+      expect(result.email.getValue()).toBe('john@example.com');
+      expect(result.role).toBe(UserRole.ADMIN);
+    });
+  });
+
+  /**
+   * =========================================================================
+   * SECTION 7: ERROR HANDLING
    * =========================================================================
    */
   describe('error handling', () => {

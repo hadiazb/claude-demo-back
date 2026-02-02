@@ -1,11 +1,4 @@
-import {
-  IsEmail,
-  IsString,
-  MinLength,
-  IsOptional,
-  IsEnum,
-} from 'class-validator';
-import { UserRole } from '@users/domain';
+import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
 
 /**
  * Data Transfer Object for creating a new user.
@@ -43,15 +36,6 @@ export class CreateUserDto {
   @IsString()
   @MinLength(2)
   lastName: string;
-
-  /**
-   * Role assigned to the new user.
-   * Optional field that defaults to USER if not specified.
-   * Must be a valid UserRole enum value (USER or ADMIN).
-   */
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
 
   /**
    * URL to the user's avatar image.

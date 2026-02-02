@@ -4,12 +4,10 @@ import {
   IsString,
   MinLength,
   IsOptional,
-  IsEnum,
   IsNumber,
   Max,
   Matches,
 } from 'class-validator';
-import { UserRole } from '@users/domain';
 
 /**
  * Data Transfer Object for user registration requests.
@@ -89,20 +87,6 @@ export class RegisterDto {
   @IsNumber()
   @Max(130)
   age?: number;
-
-  /**
-   * Role assigned to the new user.
-   * Optional field that defaults to USER if not specified.
-   * Must be a valid UserRole enum value (USER or ADMIN).
-   */
-  @ApiPropertyOptional({
-    enum: UserRole,
-    default: UserRole.USER,
-    description: 'User role',
-  })
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
 
   /**
    * URL to the user's avatar image.

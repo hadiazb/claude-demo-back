@@ -38,6 +38,7 @@ describe('UserController', () => {
       findAll: jest.fn(),
       createUser: jest.fn(),
       updateUser: jest.fn(),
+      updateUserRole: jest.fn(),
     } as unknown as jest.Mocked<UserService>;
   };
 
@@ -250,7 +251,96 @@ describe('UserController', () => {
 
   /**
    * =========================================================================
-   * SECTION 5: ERROR HANDLING
+   * SECTION 5: UPDATE ROLE TESTS
+   * =========================================================================
+   */
+  describe('updateRole', () => {
+    it('should update user role and return updated user', async () => {
+      const updatedUser = createUser({
+        id: 'target-user',
+        role: UserRole.ADMIN,
+      });
+      mockUserService.updateUserRole.mockResolvedValue(updatedUser);
+
+      const result = await controller.updateRole(
+        'target-user',
+        { role: UserRole.ADMIN },
+        'admin-123',
+      );
+
+      expect(result.role).toBe(UserRole.ADMIN);
+      expect(mockUserService.updateUserRole).toHaveBeenCalledWith(
+        'target-user',
+        UserRole.ADMIN,
+        'admin-123',
+      );
+    });
+
+    it('should pass correct parameters to service', async () => {
+      const user = createUser({ role: UserRole.USER });
+      mockUserService.updateUserRole.mockResolvedValue(user);
+
+      await controller.updateRole(
+        'user-456',
+        { role: UserRole.USER },
+        'admin-123',
+      );
+
+      expect(mockUserService.updateUserRole).toHaveBeenCalledWith(
+        'user-456',
+        UserRole.USER,
+        'admin-123',
+      );
+    });
+
+    it('should return UserResponseDto without password', async () => {
+      const user = createUser();
+      mockUserService.updateUserRole.mockResolvedValue(user);
+
+      const result = await controller.updateRole(
+        'user-123',
+        { role: UserRole.ADMIN },
+        'admin-456',
+      );
+
+      expect(result).not.toHaveProperty('password');
+      expect(result).toHaveProperty('id');
+      expect(result).toHaveProperty('role');
+    });
+
+    it('should propagate ForbiddenException from service', async () => {
+      const { ForbiddenException } = await import('@nestjs/common');
+      mockUserService.updateUserRole.mockRejectedValue(
+        new ForbiddenException('Cannot change your own role'),
+      );
+
+      await expect(
+        controller.updateRole(
+          'admin-123',
+          { role: UserRole.USER },
+          'admin-123',
+        ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should propagate NotFoundException from service', async () => {
+      mockUserService.updateUserRole.mockRejectedValue(
+        new NotFoundException('User not found'),
+      );
+
+      await expect(
+        controller.updateRole(
+          'non-existent',
+          { role: UserRole.ADMIN },
+          'admin-123',
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  /**
+   * =========================================================================
+   * SECTION 6: ERROR HANDLING
    * =========================================================================
    */
   describe('error handling', () => {

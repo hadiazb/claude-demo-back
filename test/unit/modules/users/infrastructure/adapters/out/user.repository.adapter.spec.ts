@@ -532,7 +532,53 @@ describe('UserRepositoryAdapter', () => {
 
   /**
    * =========================================================================
-   * SECTION 9: EDGE CASES AND ERROR HANDLING
+   * SECTION 9: COUNT BY ROLE TESTS
+   * =========================================================================
+   */
+  describe('countByRole', () => {
+    it('should return count of users with specified role', async () => {
+      /**
+       * TEST: Count users by role
+       */
+      mockRepository.count.mockResolvedValue(3);
+
+      const result = await adapter.countByRole(UserRole.ADMIN);
+
+      expect(result).toBe(3);
+      expect(mockRepository.count).toHaveBeenCalledWith({
+        where: { role: UserRole.ADMIN },
+      });
+    });
+
+    it('should return zero when no users have the role', async () => {
+      /**
+       * TEST: No users with role
+       */
+      mockRepository.count.mockResolvedValue(0);
+
+      const result = await adapter.countByRole(UserRole.ADMIN);
+
+      expect(result).toBe(0);
+    });
+
+    it('should count USER role correctly', async () => {
+      /**
+       * TEST: Count USER role
+       */
+      mockRepository.count.mockResolvedValue(10);
+
+      const result = await adapter.countByRole(UserRole.USER);
+
+      expect(result).toBe(10);
+      expect(mockRepository.count).toHaveBeenCalledWith({
+        where: { role: UserRole.USER },
+      });
+    });
+  });
+
+  /**
+   * =========================================================================
+   * SECTION 10: EDGE CASES AND ERROR HANDLING
    * =========================================================================
    */
   describe('edge cases', () => {
@@ -587,7 +633,7 @@ describe('UserRepositoryAdapter', () => {
 
   /**
    * =========================================================================
-   * SECTION 10: REAL-WORLD SCENARIOS
+   * SECTION 11: REAL-WORLD SCENARIOS
    * =========================================================================
    */
   describe('real-world scenarios', () => {

@@ -3,6 +3,7 @@ import {
   Inject,
   ConflictException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { INJECTION_TOKENS } from '@shared';
@@ -114,6 +115,66 @@ export class UserService {
       isActive: command.isActive ?? existingUser.isActive,
       avatarUrl: command.avatarUrl ?? existingUser.avatarUrl,
       createdAt: existingUser.createdAt,
+      updatedAt: new Date(),
+    });
+
+    return this.userRepository.update(updatedUser);
+  }
+
+  /**
+   * Updates a user's role with domain validation rules.
+   * Business rules enforced:
+   * - Admin cannot change their own role (prevents self-demotion)
+   * - Cannot demote the last admin in the system
+   *
+   * @param targetUserId - The ID of the user whose role will be changed
+   * @param newRole - The new role to assign
+   * @param requestingUserId - The ID of the admin making the request
+   * @returns Promise resolving to the updated User entity
+   * @throws NotFoundException if the target user does not exist
+   * @throws ForbiddenException if business rules are violated
+   */
+  async updateUserRole(
+    targetUserId: string,
+    newRole: UserRole,
+    requestingUserId: string,
+  ): Promise<User> {
+    // Rule 1: Cannot change own role
+    if (targetUserId === requestingUserId) {
+      throw new ForbiddenException('Cannot change your own role');
+    }
+
+    const targetUser = await this.userRepository.findById(targetUserId);
+    if (!targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Rule 2: Cannot demote the last admin
+    if (targetUser.role === UserRole.ADMIN && newRole === UserRole.USER) {
+      const adminCount = await this.userRepository.countByRole(UserRole.ADMIN);
+      if (adminCount <= 1) {
+        throw new ForbiddenException(
+          'Cannot demote the last admin. Promote another user first.',
+        );
+      }
+    }
+
+    // No change needed if role is the same
+    if (targetUser.role === newRole) {
+      return targetUser;
+    }
+
+    const updatedUser = new User({
+      id: targetUser.id,
+      email: targetUser.email,
+      password: targetUser.password,
+      firstName: targetUser.firstName,
+      lastName: targetUser.lastName,
+      age: targetUser.age,
+      role: newRole,
+      isActive: targetUser.isActive,
+      avatarUrl: targetUser.avatarUrl,
+      createdAt: targetUser.createdAt,
       updatedAt: new Date(),
     });
 

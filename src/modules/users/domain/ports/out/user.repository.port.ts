@@ -1,4 +1,4 @@
-import { User } from '../../entities/user.entity';
+import { User, UserRole } from '../../entities/user.entity';
 
 /**
  * Output port interface for User repository operations.
@@ -53,4 +53,12 @@ export interface UserRepositoryPort {
    * @returns Promise resolving to true if email exists, false otherwise
    */
   existsByEmail(email: string): Promise<boolean>;
+
+  /**
+   * Counts the number of users with a specific role.
+   * Used for business rule validation (e.g., preventing last admin demotion).
+   * @param role - The role to count users for
+   * @returns Promise resolving to the count of users with the specified role
+   */
+  countByRole(role: UserRole): Promise<number>;
 }
