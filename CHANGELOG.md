@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.4](https://github.com/hadiazb/claude-demo-back/compare/v0.3.3...v0.3.4) (2026-02-03)
+
+
+### ✨ Features
+
+* **cache:** add @Cacheable decorator for declarative caching ([617b301](https://github.com/hadiazb/claude-demo-back/commit/617b3010fa76addb3eee861bfc45027716e092b9))
+
 ### [0.3.3](https://github.com/hadiazb/claude-demo-back/compare/v0.3.2...v0.3.3) (2026-02-02)
 
 
