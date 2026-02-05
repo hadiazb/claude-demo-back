@@ -12,6 +12,8 @@ Descripción detallada (opcional)
 BREAKING CHANGE: descripción (si aplica)
 ```
 
+Header máximo: 100 caracteres. Validado por `commitlint` + `husky` (pre-commit hooks).
+
 ### Tipos disponibles
 
 | Tipo | Descripción | Bump de versión |
@@ -53,10 +55,14 @@ BREAKING CHANGE: API responses now use camelCase instead of snake_case
 - `api` - API general
 - `deps` - Dependencias
 - `config` - Configuración
+- `cache` - Módulo de caché (Redis)
+- `email` - Módulo de email (Resend)
+- `logging` - Módulo de logging (Winston)
+- `http-client` - Cliente HTTP (Axios)
 
 ## Versionamiento
 
-Este proyecto usa **Semantic Versioning** con **standard-version**.
+Este proyecto usa **Semantic Versioning** con **standard-version** (configurado en `.versionrc.json`).
 
 ### Comandos de release
 
@@ -81,23 +87,62 @@ Este proyecto sigue **Arquitectura Hexagonal** (Ports & Adapters):
 
 ```
 src/modules/{module}/
-├── domain/           # Entidades, Value Objects, Ports
-├── application/      # Servicios, DTOs, Use Cases
-└── infrastructure/   # Adapters, Controllers, Repositories
+├── domain/
+│   ├── entities/              # Entidades de dominio
+│   ├── value-objects/         # Value Objects (ej: Email, Password)
+│   └── ports/
+│       ├── in/                # Puertos de entrada (Use Cases)
+│       └── out/               # Puertos de salida (Repositorios)
+├── application/
+│   ├── dto/                   # Data Transfer Objects
+│   └── services/              # Servicios de aplicación
+└── infrastructure/
+    ├── adapters/
+    │   ├── in/                # Controllers (entrada HTTP)
+    │   └── out/               # Repository adapters (salida DB)
+    ├── persistence/
+    │   ├── entities/          # ORM entities (TypeORM)
+    │   └── mappers/           # Domain <-> ORM mappers
+    ├── guards/                # Guards de autenticación/autorización
+    ├── strategies/            # Estrategias Passport (JWT)
+    └── providers/             # Providers de inyección de dependencias
+```
+
+### Módulos shared
+
+```
+src/shared/
+├── cache/                     # Caché con Redis (adapter, decorators, interceptors)
+├── email/                     # Email con Resend (adapter, templates)
+├── http-client/               # Cliente HTTP con Axios (adapter, ports)
+├── logging/                   # Logging con Winston (adapter, middleware, sanitizers)
+├── constants/                 # Tokens de inyección de dependencias
+├── domain/                    # Entidad base
+├── infrastructure/            # Filters, interceptors, decorators compartidos
+└── interfaces/                # Interfaces de respuesta API
 ```
 
 ## Testing
 
 - **Tests unitarios**: `npm run test:unit`
+- **Tests de integración**: `npm run test:integration`
+- **Tests e2e**: `npm run test:e2e`
+- **Todos los tests**: `npm run test`
+- **Coverage**: `npm run test:cov`
 - **Coverage mínimo**: 70% (statements, branches, functions, lines)
 - **Ubicación**: `test/unit/` siguiendo la estructura de `src/`
+- **Fixtures**: `test/fixtures/` (datos de prueba)
+- **Mocks**: `test/mocks/` (logger, repository, services)
+- **Helpers**: `test/helpers/` (database, test app)
 
 ## Comandos Útiles
 
 ```bash
-npm run start:dev     # Desarrollo
+npm run start:dev     # Desarrollo (hot-reload)
 npm run lint          # Linter
 npm run test:unit     # Tests unitarios
 npm run test:cov      # Coverage
 npm run release:dry   # Simular release
+npm run migration:run # Ejecutar migraciones
+npm run build         # Build (ejecuta tests primero)
 ```
