@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.5](https://github.com/hadiazb/claude-demo-back/compare/v0.3.4...v0.3.5) (2026-02-06)
+
+
+### 📚 Documentation
+
+* update CLAUDE.md and README.md to reflect current project state ([65b3fef](https://github.com/hadiazb/claude-demo-back/commit/65b3fef76910dc8c07f9a384be13416b4da0a5d4))
+
+
+### ✨ Features
+
+* **strapi:** add module integration with Strapi CMS ([6833eb5](https://github.com/hadiazb/claude-demo-back/commit/6833eb53d27119d396414e8f6362eb88df3ab563))
+
 ### [0.3.4](https://github.com/hadiazb/claude-demo-back/compare/v0.3.3...v0.3.4) (2026-02-03)
 
 
