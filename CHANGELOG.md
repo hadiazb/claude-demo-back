@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.6](https://github.com/hadiazb/claude-demo-back/compare/v0.3.5...v0.3.6) (2026-02-06)
+
+
+### 📚 Documentation
+
+* **strapi:** add strapi module documentation to CLAUDE.md ([7db0b73](https://github.com/hadiazb/claude-demo-back/commit/7db0b737a6893338cab94564fbe2e2b57a4ec2c6))
+
 ### [0.3.5](https://github.com/hadiazb/claude-demo-back/compare/v0.3.4...v0.3.5) (2026-02-06)
 
 
