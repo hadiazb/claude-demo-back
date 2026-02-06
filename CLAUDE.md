@@ -59,6 +59,7 @@ BREAKING CHANGE: API responses now use camelCase instead of snake_case
 - `email` - Módulo de email (Resend)
 - `logging` - Módulo de logging (Winston)
 - `http-client` - Cliente HTTP (Axios)
+- `strapi` - Módulo de integración con Strapi CMS
 
 ## Versionamiento
 
@@ -107,6 +108,44 @@ src/modules/{module}/
     ├── strategies/            # Estrategias Passport (JWT)
     └── providers/             # Providers de inyección de dependencias
 ```
+
+### Módulo Strapi
+
+Integración con Strapi CMS (headless) para consumir el content type **Module**. Usa `HttpClientPort` para llamar la API de Strapi.
+
+```
+src/modules/strapi/
+├── domain/
+│   ├── entities/              # StrapiModule (documentId, config, locale)
+│   ├── value-objects/         # Country enum (CO, PY, BO, NI, SV, GT, PA, HN)
+│   └── ports/
+│       ├── in/                # FindModulesUseCase
+│       └── out/               # StrapiModuleRepositoryPort
+├── application/
+│   ├── dto/                   # StrapiModuleResponseDto, StrapiQueryDto
+│   └── services/              # StrapiModuleService
+└── infrastructure/
+    ├── adapters/
+    │   ├── in/                # StrapiModuleController (JWT + Cache + Throttle 30 req/min)
+    │   └── out/               # StrapiModuleRepositoryAdapter (HttpClientPort → Strapi API)
+    ├── mappers/               # StrapiModuleMapper (API JSON → Domain)
+    └── providers/             # STRAPI_MODULE_REPOSITORY → adapter
+```
+
+**Endpoints:**
+
+| Método | Ruta | Descripción | Filtros |
+|--------|------|-------------|---------|
+| `GET` | `/api/v1/strapi/modules` | Listar módulos | `country`, `locale` |
+| `GET` | `/api/v1/strapi/modules/by-name/:moduleName` | Módulo por nombre | `country`, `locale` |
+| `GET` | `/api/v1/strapi/modules/:documentId` | Módulo por document ID | `locale` |
+
+Todos protegidos por JWT. Cache con Redis (keys dinámicas por URL). Filtrado de country local (post-fetch).
+
+**Variables de entorno:**
+
+- `STRAPI_MODULE_REPOSITORY` - URL de la API de Strapi
+- `STRAPI_API_TOKEN` - Token de API de Strapi
 
 ### Módulos shared
 
