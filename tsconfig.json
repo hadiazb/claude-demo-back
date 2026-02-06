@@ -29,7 +29,9 @@
       "@auth": ["src/modules/auth"],
       "@auth/*": ["src/modules/auth/*"],
       "@users": ["src/modules/users"],
-      "@users/*": ["src/modules/users/*"]
+      "@users/*": ["src/modules/users/*"],
+      "@strapi": ["src/modules/strapi"],
+      "@strapi/*": ["src/modules/strapi/*"]
     }
   }
 }

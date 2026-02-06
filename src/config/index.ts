@@ -4,4 +4,5 @@ export { default as jwtConfig } from './jwt.config';
 export { default as loggerConfig } from './logger.config';
 export { default as emailConfig } from './email.config';
 export { default as cacheConfig } from './cache.config';
+export { default as strapiConfig } from './strapi.config';
 export * from './validators';

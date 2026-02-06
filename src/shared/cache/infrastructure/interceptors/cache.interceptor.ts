@@ -50,19 +50,27 @@ export class CacheInterceptor implements NestInterceptor {
     this.logger = logger.setContext(CacheInterceptor.name);
   }
 
+  private buildDynamicKey(baseKey: string, context: ExecutionContext): string {
+    const request = context.switchToHttp().getRequest();
+    const path: string = request.url || request.originalUrl || '';
+    return `${baseKey}:${path}`;
+  }
+
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<unknown>> {
-    const cacheKey = this.reflector.get<string>(
+    const baseKey = this.reflector.get<string>(
       CACHE_KEY_METADATA,
       context.getHandler(),
     );
 
     // If no cache key is set, skip caching
-    if (!cacheKey) {
+    if (!baseKey) {
       return next.handle();
     }
+
+    const cacheKey = this.buildDynamicKey(baseKey, context);
 
     const ttl = this.reflector.get<number>(
       CACHE_TTL_METADATA,

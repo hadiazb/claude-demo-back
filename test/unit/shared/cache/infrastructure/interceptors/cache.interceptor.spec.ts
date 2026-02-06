@@ -17,14 +17,18 @@ describe('CacheInterceptor', () => {
   let mockCache: jest.Mocked<CachePort>;
   let mockLogger: jest.Mocked<LoggerPort>;
 
-  const createMockExecutionContext = (): ExecutionContext => {
+  const createMockExecutionContext = (
+    url = '/api/v1/test',
+  ): ExecutionContext => {
     return {
       getHandler: jest.fn().mockReturnValue(() => {}),
       getClass: jest.fn(),
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
       switchToRpc: jest.fn(),
-      switchToHttp: jest.fn(),
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue({ url }),
+      }),
       switchToWs: jest.fn(),
       getType: jest.fn(),
     } as unknown as ExecutionContext;
@@ -106,7 +110,7 @@ describe('CacheInterceptor', () => {
       const result = await lastValueFrom(result$);
 
       expect(result).toEqual(cachedData);
-      expect(mockCache.get).toHaveBeenCalledWith('users:all');
+      expect(mockCache.get).toHaveBeenCalledWith('users:all:/api/v1/test');
       expect(handler.handle).not.toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Cache HIT'),
@@ -130,8 +134,12 @@ describe('CacheInterceptor', () => {
       const result = await lastValueFrom(result$);
 
       expect(result).toEqual(freshData);
-      expect(mockCache.get).toHaveBeenCalledWith('users:all');
-      expect(mockCache.set).toHaveBeenCalledWith('users:all', freshData, 300);
+      expect(mockCache.get).toHaveBeenCalledWith('users:all:/api/v1/test');
+      expect(mockCache.set).toHaveBeenCalledWith(
+        'users:all:/api/v1/test',
+        freshData,
+        300,
+      );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Cache MISS'),
       );
@@ -153,7 +161,11 @@ describe('CacheInterceptor', () => {
       const result$ = await interceptor.intercept(context, handler);
       await lastValueFrom(result$);
 
-      expect(mockCache.set).toHaveBeenCalledWith('test:key', freshData, 600);
+      expect(mockCache.set).toHaveBeenCalledWith(
+        'test:key:/api/v1/test',
+        freshData,
+        600,
+      );
     });
 
     it('should log cache check details', async () => {
@@ -172,7 +184,7 @@ describe('CacheInterceptor', () => {
       await lastValueFrom(result$);
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('Cache check for key: users:all'),
+        expect.stringContaining('Cache check for key: users:all:/api/v1/test'),
       );
     });
 

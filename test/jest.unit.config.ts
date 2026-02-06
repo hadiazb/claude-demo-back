@@ -18,6 +18,8 @@ const config: Config = {
     '^@users/(.*)$': '<rootDir>/src/modules/users/$1',
     '^@auth$': '<rootDir>/src/modules/auth',
     '^@auth/(.*)$': '<rootDir>/src/modules/auth/$1',
+    '^@strapi$': '<rootDir>/src/modules/strapi',
+    '^@strapi/(.*)$': '<rootDir>/src/modules/strapi/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
   },
   collectCoverageFrom: [

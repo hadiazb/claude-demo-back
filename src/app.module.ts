@@ -10,6 +10,7 @@ import {
   loggerConfig,
   emailConfig,
   cacheConfig,
+  strapiConfig,
 } from '@config';
 import {
   LoggingModule,
@@ -19,6 +20,7 @@ import {
 } from '@shared';
 import { UsersModule } from '@users';
 import { AuthModule } from '@auth';
+import { StrapiModule } from '@strapi';
 
 const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
 
@@ -33,6 +35,7 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
         loggerConfig,
         emailConfig,
         cacheConfig,
+        strapiConfig,
       ],
       envFilePath: envFile,
     }),
@@ -78,6 +81,7 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
     }),
     UsersModule,
     AuthModule,
+    StrapiModule,
   ],
   controllers: [],
   providers: [
