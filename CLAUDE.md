@@ -111,28 +111,28 @@ src/modules/{module}/
 
 ### Módulo Strapi
 
-Integración con Strapi CMS (headless) para consumir el content type **Module**. Usa `HttpClientPort` para llamar la API de Strapi.
+Integración con Strapi CMS (headless) para consumir los content types **Module** y **Tabs Menu**. Usa `HttpClientPort` para llamar la API de Strapi.
 
 ```
 src/modules/strapi/
 ├── domain/
-│   ├── entities/              # StrapiModule (documentId, config, locale)
+│   ├── entities/              # StrapiModule, StrapiTabsMenu
 │   ├── value-objects/         # Country enum (CO, PY, BO, NI, SV, GT, PA, HN)
 │   └── ports/
-│       ├── in/                # FindModulesUseCase
-│       └── out/               # StrapiModuleRepositoryPort
+│       ├── in/                # FindModulesUseCase, FindTabsMenuUseCase
+│       └── out/               # StrapiModuleRepositoryPort, StrapiTabsMenuRepositoryPort
 ├── application/
-│   ├── dto/                   # StrapiModuleResponseDto, StrapiQueryDto
-│   └── services/              # StrapiModuleService
+│   ├── dto/                   # StrapiModuleResponseDto, StrapiTabsMenuResponseDto, StrapiQueryDto, StrapiTabsMenuQueryDto
+│   └── services/              # StrapiModuleService, StrapiTabsMenuService
 └── infrastructure/
     ├── adapters/
-    │   ├── in/                # StrapiModuleController (JWT + Cache + Throttle 30 req/min)
-    │   └── out/               # StrapiModuleRepositoryAdapter (HttpClientPort → Strapi API)
-    ├── mappers/               # StrapiModuleMapper (API JSON → Domain)
-    └── providers/             # STRAPI_MODULE_REPOSITORY → adapter
+    │   ├── in/                # StrapiModuleController, StrapiTabsMenuController (JWT + Cache + Throttle 30 req/min)
+    │   └── out/               # StrapiModuleRepositoryAdapter, StrapiTabsMenuRepositoryAdapter (HttpClientPort → Strapi API)
+    ├── mappers/               # StrapiModuleMapper, StrapiTabsMenuMapper (API JSON → Domain)
+    └── providers/             # STRAPI_MODULE_REPOSITORY, STRAPI_TABS_MENU_REPOSITORY → adapters
 ```
 
-**Endpoints:**
+**Endpoints Module:**
 
 | Método | Ruta | Descripción | Filtros |
 |--------|------|-------------|---------|
@@ -140,11 +140,23 @@ src/modules/strapi/
 | `GET` | `/api/v1/strapi/modules/by-name/:moduleName` | Módulo por nombre | `country`, `locale` |
 | `GET` | `/api/v1/strapi/modules/:documentId` | Módulo por document ID | `locale` |
 
-Todos protegidos por JWT. Cache con Redis (keys dinámicas por URL). Filtrado de country local (post-fetch).
+**Endpoints Tabs Menu:**
+
+| Método | Ruta | Descripción | Filtros |
+|--------|------|-------------|---------|
+| `GET` | `/api/v1/strapi/tabs-menu` | Listar items del menú | `country`, `locale`, `menuType` |
+| `GET` | `/api/v1/strapi/tabs-menu/:id` | Item por ID numérico | `country`, `locale`, `menuType` |
+
+Todos protegidos por JWT. Cache con Redis (300s TTL). Throttle 30 req/min. Filtrado de country y menuType local (post-fetch).
+
+**Diferencias clave entre Module y Tabs Menu:**
+
+- **Module**: entidad con wrapper `config`, `documentId` (string), country es array → filtrado con `includes()`
+- **Tabs Menu**: entidad plana (sin `config`), `id` numérico, country es string → filtrado con `===`
 
 **Variables de entorno:**
 
-- `STRAPI_MODULE_REPOSITORY` - URL de la API de Strapi
+- `STRAPI_API_URL` - URL de la API de Strapi
 - `STRAPI_API_TOKEN` - Token de API de Strapi
 
 ### Módulos shared
