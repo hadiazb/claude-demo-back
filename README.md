@@ -38,6 +38,7 @@ This project is a REST API that implements an authentication and user management
 - Global exception handling
 - API documentation with Swagger/OpenAPI
 - Automatic database migrations (TypeORM)
+- Strapi CMS integration (Module content type consumption via HTTP)
 
 ## Technologies
 
@@ -151,23 +152,39 @@ src/
     │       ├── guards/              # JWT auth, JWT refresh, Roles guards
     │       ├── persistence/entities/# RefreshToken ORM entity
     │       └── strategies/          # JWT, JWT refresh strategies
-    └── users/                       # Users module
+    ├── users/                       # Users module
+    │   ├── application/
+    │   │   ├── dto/                 # UpdateUser, UserResponse DTOs
+    │   │   └── services/            # User service
+    │   ├── domain/
+    │   │   ├── entities/            # User entity
+    │   │   ├── value-objects/       # Email, Password VOs
+    │   │   └── ports/
+    │   │       ├── in/              # CreateUser, FindUser, UpdateUser use cases
+    │   │       └── out/             # User repository port
+    │   └── infrastructure/
+    │       ├── adapters/
+    │       │   ├── in/              # User controller
+    │       │   └── out/             # User repository adapter
+    │       ├── persistence/
+    │       │   ├── entities/        # User ORM entity
+    │       │   └── mappers/         # User mapper (domain <-> ORM)
+    │       └── providers/           # Dependency injection providers
+    └── strapi/                      # Strapi CMS integration module
         ├── application/
-        │   ├── dto/                 # UpdateUser, UserResponse DTOs
-        │   └── services/            # User service
+        │   ├── dto/                 # StrapiModuleResponse, StrapiQuery DTOs
+        │   └── services/            # Strapi module service
         ├── domain/
-        │   ├── entities/            # User entity
-        │   ├── value-objects/       # Email, Password VOs
+        │   ├── entities/            # StrapiModule entity
+        │   ├── value-objects/       # Country enum (CO, PY, BO, NI, SV, GT, PA, HN)
         │   └── ports/
-        │       ├── in/              # CreateUser, FindUser, UpdateUser use cases
-        │       └── out/             # User repository port
+        │       ├── in/              # FindModules use case
+        │       └── out/             # StrapiModule repository port
         └── infrastructure/
             ├── adapters/
-            │   ├── in/              # User controller
-            │   └── out/             # User repository adapter
-            ├── persistence/
-            │   ├── entities/        # User ORM entity
-            │   └── mappers/         # User mapper (domain <-> ORM)
+            │   ├── in/              # Strapi module controller
+            │   └── out/             # Strapi module repository adapter (HTTP)
+            ├── mappers/             # Strapi API JSON → Domain mapper
             └── providers/           # Dependency injection providers
 ```
 
@@ -191,8 +208,8 @@ claude-initial-demo/
 │   ├── .env.prod             # Production
 │   └── .env.example          # Example template
 ├── src/
-│   ├── config/               # App, database, JWT, logger, email, cache configs
-│   ├── modules/              # Application modules (auth, users)
+│   ├── config/               # App, database, JWT, logger, email, cache, strapi configs
+│   ├── modules/              # Application modules (auth, users, strapi)
 │   ├── shared/               # Shared modules (cache, email, http-client, logging)
 │   ├── app.module.ts         # Main module
 │   └── main.ts               # Entry point
@@ -332,6 +349,13 @@ nano environment/.env.dev
 | `CACHE_DEFAULT_TTL` | Default cache TTL in seconds | `3600` |
 | `CACHE_KEY_PREFIX` | Cache key prefix | `app:` |
 
+#### Strapi CMS
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `STRAPI_MODULE_REPOSITORY` | Strapi CMS API base URL | `http://localhost:1337` |
+| `STRAPI_API_TOKEN` | Strapi API token for authentication | - |
+
 #### Migrations
 
 | Variable | Description | Default |
@@ -380,6 +404,10 @@ REDIS_PORT=6379
 REDIS_PASSWORD=
 CACHE_DEFAULT_TTL=3600
 CACHE_KEY_PREFIX=app:
+
+# Strapi CMS
+STRAPI_MODULE_REPOSITORY=https://your-strapi-instance.up.railway.app
+STRAPI_API_TOKEN=your-strapi-api-token
 
 # Migrations
 RUN_MIGRATIONS=true
@@ -469,9 +497,21 @@ Base URL: `http://localhost:3000/api/v1`
 | GET | `/users` | List all users | JWT | Yes |
 | PATCH | `/users/:id/role` | Update user role | JWT | Yes |
 
+### Strapi Modules (`/strapi/modules`)
+
+| Method | Endpoint | Description | Auth | Rate Limit | Filters |
+|--------|----------|-------------|------|------------|---------|
+| GET | `/strapi/modules` | List all modules | JWT | 30/60s | `country`, `locale` |
+| GET | `/strapi/modules/by-name/:moduleName` | Get module by name | JWT | 30/60s | `country`, `locale` |
+| GET | `/strapi/modules/:documentId` | Get module by document ID | JWT | 30/60s | `locale` |
+
+**Query parameters:**
+- `country` — Filter by country code (`CO`, `PY`, `BO`, `NI`, `SV`, `GT`, `PA`, `HN`). Applied locally after fetching from Strapi.
+- `locale` — Strapi locale for internationalization (e.g., `es`, `en`).
+
 ### Rate Limiting
 
-Global default: 200 requests per 60 seconds. Specific limits apply to auth endpoints as shown above.
+Global default: 200 requests per 60 seconds. Specific limits apply to auth and strapi endpoints as shown above.
 
 ### Response Structure
 
