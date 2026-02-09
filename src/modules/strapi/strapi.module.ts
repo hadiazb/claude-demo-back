@@ -1,18 +1,27 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '@auth';
-import { StrapiModuleController } from '@strapi/infrastructure/adapters';
-import { StrapiModuleService } from '@strapi/application/services';
-import { StrapiModuleRepositoryAdapter } from '@strapi/infrastructure/adapters';
+import {
+  StrapiModuleController,
+  StrapiTabsMenuController,
+  StrapiModuleRepositoryAdapter,
+  StrapiTabsMenuRepositoryAdapter,
+} from '@strapi/infrastructure/adapters';
+import {
+  StrapiModuleService,
+  StrapiTabsMenuService,
+} from '@strapi/application/services';
 import { strapiProviders } from '@strapi/infrastructure/providers';
 
 @Module({
   imports: [AuthModule],
-  controllers: [StrapiModuleController],
+  controllers: [StrapiModuleController, StrapiTabsMenuController],
   providers: [
     StrapiModuleService,
+    StrapiTabsMenuService,
     StrapiModuleRepositoryAdapter,
+    StrapiTabsMenuRepositoryAdapter,
     ...strapiProviders,
   ],
-  exports: [StrapiModuleService],
+  exports: [StrapiModuleService, StrapiTabsMenuService],
 })
 export class StrapiModule {}
