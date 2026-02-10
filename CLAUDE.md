@@ -122,12 +122,13 @@ src/modules/strapi/
 │       ├── in/                # FindModulesUseCase, FindTabsMenuUseCase, FindAboutMeMenuUseCase
 │       └── out/               # StrapiModuleRepositoryPort, StrapiTabsMenuRepositoryPort, StrapiAboutMeMenuRepositoryPort
 ├── application/
-│   ├── dto/                   # StrapiModuleResponseDto, StrapiTabsMenuResponseDto, StrapiAboutMeMenuResponseDto, StrapiQueryDto, StrapiTabsMenuQueryDto, StrapiAboutMeMenuQueryDto
-│   └── services/              # StrapiModuleService, StrapiTabsMenuService, StrapiAboutMeMenuService
+│   ├── dto/                   # StrapiModuleResponseDto, StrapiTabsMenuResponseDto, StrapiAboutMeMenuResponseDto, StrapiQueryDto, StrapiTabsMenuQueryDto, StrapiAboutMeMenuQueryDto, StrapiWebhookPayloadDto
+│   └── services/              # StrapiModuleService, StrapiTabsMenuService, StrapiAboutMeMenuService, StrapiWebhookService
 └── infrastructure/
     ├── adapters/
-    │   ├── in/                # StrapiModuleController, StrapiTabsMenuController, StrapiAboutMeMenuController (JWT + Cache + Throttle 30 req/min)
+    │   ├── in/                # StrapiModuleController, StrapiTabsMenuController, StrapiAboutMeMenuController (JWT + Cache + Throttle 30 req/min), StrapiWebhookController
     │   └── out/               # StrapiModuleRepositoryAdapter, StrapiTabsMenuRepositoryAdapter, StrapiAboutMeMenuRepositoryAdapter (HttpClientPort → Strapi API)
+    ├── guards/                # WebhookSecretGuard (valida x-webhook-secret header)
     ├── mappers/               # StrapiModuleMapper, StrapiTabsMenuMapper, StrapiAboutMeMenuMapper (API JSON → Domain)
     └── providers/             # STRAPI_MODULE_REPOSITORY, STRAPI_TABS_MENU_REPOSITORY, STRAPI_ABOUT_ME_MENU_REPOSITORY → adapters
 ```
@@ -156,6 +157,16 @@ src/modules/strapi/
 
 Todos protegidos por JWT. Cache con Redis (300s TTL). Throttle 30 req/min. Filtrado de country y menuType local (post-fetch).
 
+**Endpoints Webhook (Cache Invalidation):**
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `POST` | `/api/v1/strapi/webhook/cache-invalidation` | Invalidar cache de strapi (`strapi:*`) | `x-webhook-secret` header |
+| `GET` | `/api/v1/strapi/webhook/cache-timestamp` | Obtener timestamp de última invalidación | JWT (Bearer) |
+
+- **POST cache-invalidation**: Strapi invoca este endpoint al modificar contenido. Borra todas las keys `strapi:*` de Redis y escribe la key `strapi:cache` con el timestamp actual (TTL 30 días). Autenticado con header `x-webhook-secret` (sin JWT, sin cache, sin throttle).
+- **GET cache-timestamp**: Retorna `{ timestamp: string | null }` con el valor de la key `strapi:cache`. El frontend lo compara con su timestamp local para decidir si debe limpiar su cache. Protegido por JWT.
+
 **Diferencias clave entre Module, Tabs Menu y About Me Menu:**
 
 - **Module**: entidad con wrapper `config`, `documentId` (string), country es array → filtrado con `includes()`
@@ -166,6 +177,7 @@ Todos protegidos por JWT. Cache con Redis (300s TTL). Throttle 30 req/min. Filtr
 
 - `STRAPI_API_URL` - URL de la API de Strapi
 - `STRAPI_API_TOKEN` - Token de API de Strapi
+- `STRAPI_WEBHOOK_SECRET` - Secret compartido para autenticar webhooks de Strapi
 
 ### Módulos shared
 
