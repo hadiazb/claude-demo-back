@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.3](https://github.com/hadiazb/claude-demo-back/compare/v0.4.2...v0.4.3) (2026-02-10)
+
+
+### ✨ Features
+
+* **strapi:** add webhook endpoint for cache invalidation ([cafbc37](https://github.com/hadiazb/claude-demo-back/commit/cafbc372879c52bea6d0c5520e559365a192b7d0))
+
 ### [0.4.2](https://github.com/hadiazb/claude-demo-back/compare/v0.4.1...v0.4.2) (2026-02-10)
 
 
