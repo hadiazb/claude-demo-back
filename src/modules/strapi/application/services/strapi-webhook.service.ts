@@ -2,7 +2,6 @@ import { Injectable, Inject } from '@nestjs/common';
 import { INJECTION_TOKENS } from '@shared/constants';
 import { CachePort } from '@shared/cache/domain/ports';
 import { LoggerPort } from '@shared/logging/domain/ports';
-import { StrapiWebhookPayloadDto } from '@strapi/application/dto';
 
 @Injectable()
 export class StrapiWebhookService {
@@ -17,16 +16,11 @@ export class StrapiWebhookService {
     this.logger = logger.setContext(StrapiWebhookService.name);
   }
 
-  async invalidateCache(payload: StrapiWebhookPayloadDto): Promise<{
+  async invalidateCache(): Promise<{
     message: string;
     timestamp: string;
-    event: string;
-    model: string;
   }> {
-    this.logger.info('Cache invalidation requested', undefined, {
-      event: payload.event,
-      model: payload.model,
-    });
+    this.logger.info('Cache invalidation requested via webhook');
 
     await this.cache.deleteByPattern('strapi:*');
 
@@ -38,8 +32,6 @@ export class StrapiWebhookService {
     return {
       message: 'Cache invalidated successfully',
       timestamp,
-      event: payload.event,
-      model: payload.model,
     };
   }
 

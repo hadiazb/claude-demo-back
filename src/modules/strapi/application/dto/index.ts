@@ -4,4 +4,3 @@ export * from './strapi-tabs-menu-query.dto';
 export * from './strapi-about-me-menu-response.dto';
 export * from './strapi-about-me-menu-query.dto';
 export * from './strapi-query.dto';
-export * from './strapi-webhook-payload.dto';

@@ -1,6 +1,5 @@
 import { StrapiWebhookController } from '@strapi/infrastructure/adapters';
 import { StrapiWebhookService } from '@strapi/application/services';
-import { StrapiWebhookPayloadDto } from '@strapi/application/dto';
 
 describe('StrapiWebhookController', () => {
   let controller: StrapiWebhookController;
@@ -22,65 +21,37 @@ describe('StrapiWebhookController', () => {
   });
 
   describe('invalidateCache', () => {
-    const payload: StrapiWebhookPayloadDto = {
-      event: 'entry.update',
-      model: 'module',
-    };
-
     const serviceResponse = {
       message: 'Cache invalidated successfully',
       timestamp: '2024-01-01T00:00:00.000Z',
-      event: 'entry.update',
-      model: 'module',
     };
 
-    it('should call service.invalidateCache with payload', async () => {
+    it('should call service.invalidateCache', async () => {
       mockService.invalidateCache.mockResolvedValue(serviceResponse);
 
-      await controller.invalidateCache(payload);
+      await controller.invalidateCache();
 
-      expect(mockService.invalidateCache).toHaveBeenCalledWith(payload);
+      expect(mockService.invalidateCache).toHaveBeenCalled();
     });
 
     it('should return service response', async () => {
       mockService.invalidateCache.mockResolvedValue(serviceResponse);
 
-      const result = await controller.invalidateCache(payload);
+      const result = await controller.invalidateCache();
 
       expect(result).toEqual(serviceResponse);
-    });
-
-    it('should handle payload with entry data', async () => {
-      const payloadWithEntry: StrapiWebhookPayloadDto = {
-        event: 'entry.create',
-        model: 'tabs-menu',
-        entry: { id: 1, label: 'Dashboard' },
-      };
-      mockService.invalidateCache.mockResolvedValue({
-        ...serviceResponse,
-        event: 'entry.create',
-        model: 'tabs-menu',
-      });
-
-      await controller.invalidateCache(payloadWithEntry);
-
-      expect(mockService.invalidateCache).toHaveBeenCalledWith(
-        payloadWithEntry,
-      );
     });
 
     it('should propagate service errors', async () => {
       mockService.invalidateCache.mockRejectedValue(new Error('Cache error'));
 
-      await expect(controller.invalidateCache(payload)).rejects.toThrow(
-        'Cache error',
-      );
+      await expect(controller.invalidateCache()).rejects.toThrow('Cache error');
     });
 
     it('should call service exactly once per request', async () => {
       mockService.invalidateCache.mockResolvedValue(serviceResponse);
 
-      await controller.invalidateCache(payload);
+      await controller.invalidateCache();
 
       expect(mockService.invalidateCache).toHaveBeenCalledTimes(1);
     });

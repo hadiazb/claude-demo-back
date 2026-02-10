@@ -43,13 +43,11 @@ describe('StrapiWebhookService', () => {
   });
 
   describe('invalidateCache', () => {
-    const payload = { event: 'entry.update', model: 'module' };
-
     it('should call deleteByPattern with strapi:* pattern', async () => {
       mockCache.deleteByPattern.mockResolvedValue(undefined);
       mockCache.set.mockResolvedValue(undefined);
 
-      await service.invalidateCache(payload);
+      await service.invalidateCache();
 
       expect(mockCache.deleteByPattern).toHaveBeenCalledWith('strapi:*');
     });
@@ -58,7 +56,7 @@ describe('StrapiWebhookService', () => {
       mockCache.deleteByPattern.mockResolvedValue(undefined);
       mockCache.set.mockResolvedValue(undefined);
 
-      await service.invalidateCache(payload);
+      await service.invalidateCache();
 
       expect(mockCache.set).toHaveBeenCalledWith(
         'strapi:cache',
@@ -78,20 +76,18 @@ describe('StrapiWebhookService', () => {
         return Promise.resolve();
       });
 
-      await service.invalidateCache(payload);
+      await service.invalidateCache();
 
       expect(callOrder).toEqual(['deleteByPattern', 'set']);
     });
 
-    it('should return success response with payload info', async () => {
+    it('should return success response with message and timestamp', async () => {
       mockCache.deleteByPattern.mockResolvedValue(undefined);
       mockCache.set.mockResolvedValue(undefined);
 
-      const result = await service.invalidateCache(payload);
+      const result = await service.invalidateCache();
 
       expect(result.message).toBe('Cache invalidated successfully');
-      expect(result.event).toBe('entry.update');
-      expect(result.model).toBe('module');
       expect(result.timestamp).toBeDefined();
     });
 
@@ -99,22 +95,20 @@ describe('StrapiWebhookService', () => {
       mockCache.deleteByPattern.mockResolvedValue(undefined);
       mockCache.set.mockResolvedValue(undefined);
 
-      const result = await service.invalidateCache(payload);
+      const result = await service.invalidateCache();
 
       expect(() => new Date(result.timestamp)).not.toThrow();
       expect(new Date(result.timestamp).toISOString()).toBe(result.timestamp);
     });
 
-    it('should log event and model from payload', async () => {
+    it('should log cache invalidation request', async () => {
       mockCache.deleteByPattern.mockResolvedValue(undefined);
       mockCache.set.mockResolvedValue(undefined);
 
-      await service.invalidateCache(payload);
+      await service.invalidateCache();
 
       expect(mockLogger.info).toHaveBeenCalledWith(
-        'Cache invalidation requested',
-        undefined,
-        { event: 'entry.update', model: 'module' },
+        'Cache invalidation requested via webhook',
       );
     });
 
@@ -122,22 +116,11 @@ describe('StrapiWebhookService', () => {
       mockCache.deleteByPattern.mockResolvedValue(undefined);
       mockCache.set.mockResolvedValue(undefined);
 
-      await service.invalidateCache(payload);
+      await service.invalidateCache();
 
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Cache invalidation completed for pattern strapi:*',
       );
-    });
-
-    it('should handle different event types', async () => {
-      mockCache.deleteByPattern.mockResolvedValue(undefined);
-      mockCache.set.mockResolvedValue(undefined);
-      const createPayload = { event: 'entry.create', model: 'tabs-menu' };
-
-      const result = await service.invalidateCache(createPayload);
-
-      expect(result.event).toBe('entry.create');
-      expect(result.model).toBe('tabs-menu');
     });
 
     it('should propagate cache errors', async () => {
@@ -145,7 +128,7 @@ describe('StrapiWebhookService', () => {
         new Error('Redis connection error'),
       );
 
-      await expect(service.invalidateCache(payload)).rejects.toThrow(
+      await expect(service.invalidateCache()).rejects.toThrow(
         'Redis connection error',
       );
     });

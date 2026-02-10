@@ -161,10 +161,10 @@ Todos protegidos por JWT. Cache con Redis (300s TTL). Throttle 30 req/min. Filtr
 
 | Método | Ruta | Descripción | Auth |
 |--------|------|-------------|------|
-| `POST` | `/api/v1/strapi/webhook/cache-invalidation` | Invalidar cache de strapi (`strapi:*`) | `x-webhook-secret` header |
+| `GET` | `/api/v1/strapi/webhook/cache-invalidation` | Invalidar cache de strapi (`strapi:*`) | `x-webhook-secret` header |
 | `GET` | `/api/v1/strapi/webhook/cache-timestamp` | Obtener timestamp de última invalidación | JWT (Bearer) |
 
-- **POST cache-invalidation**: Strapi invoca este endpoint al modificar contenido. Borra todas las keys `strapi:*` de Redis y escribe la key `strapi:cache` con el timestamp actual (TTL 30 días). Autenticado con header `x-webhook-secret` (sin JWT, sin cache, sin throttle).
+- **GET cache-invalidation**: Strapi invoca este endpoint al modificar contenido. Borra todas las keys `strapi:*` de Redis y escribe la key `strapi:cache` con el timestamp actual (TTL 30 días). Autenticado con header `x-webhook-secret` (sin JWT, sin cache, sin throttle).
 - **GET cache-timestamp**: Retorna `{ timestamp: string | null }` con el valor de la key `strapi:cache`. El frontend lo compara con su timestamp local para decidir si debe limpiar su cache. Protegido por JWT.
 
 **Diferencias clave entre Module, Tabs Menu y About Me Menu:**
