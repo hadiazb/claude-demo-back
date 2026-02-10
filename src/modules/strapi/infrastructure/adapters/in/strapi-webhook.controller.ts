@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -15,7 +15,7 @@ import { WebhookSecretGuard } from '@strapi/infrastructure/guards/webhook-secret
 export class StrapiWebhookController {
   constructor(private readonly strapiWebhookService: StrapiWebhookService) {}
 
-  @Get('cache-invalidation')
+  @Post('cache-invalidation')
   @UseGuards(WebhookSecretGuard)
   @ApiOperation({ summary: 'Invalidate Strapi cache via webhook' })
   @ApiHeader({
@@ -23,7 +23,7 @@ export class StrapiWebhookController {
     required: true,
     description: 'Webhook authentication secret',
   })
-  @ApiResponse({ status: 200, description: 'Cache invalidated successfully' })
+  @ApiResponse({ status: 201, description: 'Cache invalidated successfully' })
   @ApiResponse({
     status: 401,
     description: 'Invalid or missing webhook secret',
