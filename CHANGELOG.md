@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.2](https://github.com/hadiazb/claude-demo-back/compare/v0.4.1...v0.4.2) (2026-02-10)
+
+
+### 📚 Documentation
+
+* **strapi:** add about-me-menu endpoints to CLAUDE.md ([7678401](https://github.com/hadiazb/claude-demo-back/commit/7678401ad9c72d78a3b016b05d833a8e4f217039))
+
 ### [0.4.1](https://github.com/hadiazb/claude-demo-back/compare/v0.4.0...v0.4.1) (2026-02-10)
 
 
