@@ -4,6 +4,7 @@ import {
   StrapiModuleController,
   StrapiTabsMenuController,
   StrapiAboutMeMenuController,
+  StrapiWebhookController,
   StrapiModuleRepositoryAdapter,
   StrapiTabsMenuRepositoryAdapter,
   StrapiAboutMeMenuRepositoryAdapter,
@@ -12,8 +13,10 @@ import {
   StrapiModuleService,
   StrapiTabsMenuService,
   StrapiAboutMeMenuService,
+  StrapiWebhookService,
 } from '@strapi/application/services';
 import { strapiProviders } from '@strapi/infrastructure/providers';
+import { WebhookSecretGuard } from '@strapi/infrastructure/guards/webhook-secret.guard';
 
 @Module({
   imports: [AuthModule],
@@ -21,11 +24,14 @@ import { strapiProviders } from '@strapi/infrastructure/providers';
     StrapiModuleController,
     StrapiTabsMenuController,
     StrapiAboutMeMenuController,
+    StrapiWebhookController,
   ],
   providers: [
     StrapiModuleService,
     StrapiTabsMenuService,
     StrapiAboutMeMenuService,
+    StrapiWebhookService,
+    WebhookSecretGuard,
     StrapiModuleRepositoryAdapter,
     StrapiTabsMenuRepositoryAdapter,
     StrapiAboutMeMenuRepositoryAdapter,
