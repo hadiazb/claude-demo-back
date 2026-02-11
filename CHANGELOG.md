@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.7](https://github.com/hadiazb/claude-demo-back/compare/v0.4.6...v0.4.7) (2026-02-11)
+
+
+### ⚡ Performance
+
+* **strapi:** increase throttle limit from 30 to 200 req/min ([839ecd2](https://github.com/hadiazb/claude-demo-back/commit/839ecd22b555796ca5854bd6a56d5916bf51de6c))
+
 ### [0.4.6](https://github.com/hadiazb/claude-demo-back/compare/v0.4.5...v0.4.6) (2026-02-11)
 
 
