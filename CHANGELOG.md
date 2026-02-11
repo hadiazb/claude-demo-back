@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.8](https://github.com/hadiazb/claude-demo-back/compare/v0.4.7...v0.4.8) (2026-02-11)
+
+
+### 🐛 Bug Fixes
+
+* **strapi:** remove @Body() from webhook to bypass ValidationPipe ([58e7811](https://github.com/hadiazb/claude-demo-back/commit/58e7811c888302c470146efefc26e55d51ebade5))
+
 ### [0.4.7](https://github.com/hadiazb/claude-demo-back/compare/v0.4.6...v0.4.7) (2026-02-11)
 
 
