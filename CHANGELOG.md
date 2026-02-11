@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.4](https://github.com/hadiazb/claude-demo-back/compare/v0.4.3...v0.4.4) (2026-02-11)
+
+
+### 📚 Documentation
+
+* **strapi:** add webhook endpoints to CLAUDE.md ([6c0593b](https://github.com/hadiazb/claude-demo-back/commit/6c0593b7849595c3f1ff28a4c52cf17a90c20057))
+
+
+### 🐛 Bug Fixes
+
+* **strapi:** change webhook cache-invalidation from POST to GET ([13c2d4b](https://github.com/hadiazb/claude-demo-back/commit/13c2d4b80da483ed52f938c17cbcc8ca1771e4d4))
+* **strapi:** revert webhook cache-invalidation to POST method ([eb4a40a](https://github.com/hadiazb/claude-demo-back/commit/eb4a40ae47bb982941167a17b9e7a503561bd20e))
+
 ### [0.4.3](https://github.com/hadiazb/claude-demo-back/compare/v0.4.2...v0.4.3) (2026-02-10)
 
 
