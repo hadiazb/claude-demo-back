@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.6](https://github.com/hadiazb/claude-demo-back/compare/v0.4.5...v0.4.6) (2026-02-11)
+
+
+### 👷 CI/CD
+
+* **build:** remove unit tests from build command ([398ba84](https://github.com/hadiazb/claude-demo-back/commit/398ba847de8b8269062907edd1537d023303a750))
+
 ### [0.4.5](https://github.com/hadiazb/claude-demo-back/compare/v0.4.4...v0.4.5) (2026-02-11)
 
 
