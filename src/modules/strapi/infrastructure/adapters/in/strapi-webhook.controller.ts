@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -8,7 +8,6 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/infrastructure/guards';
 import { StrapiWebhookService } from '@strapi/application/services';
-import { StrapiWebhookPayloadDto } from '@strapi/application/dto';
 import { WebhookSecretGuard } from '@strapi/infrastructure/guards/webhook-secret.guard';
 
 @ApiTags('Strapi - Webhook')
@@ -29,8 +28,7 @@ export class StrapiWebhookController {
     status: 401,
     description: 'Invalid or missing webhook secret',
   })
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async invalidateCache(@Body() _payload: StrapiWebhookPayloadDto) {
+  async invalidateCache() {
     return this.strapiWebhookService.invalidateCache();
   }
 
