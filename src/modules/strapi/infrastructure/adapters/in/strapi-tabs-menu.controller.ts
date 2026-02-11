@@ -25,7 +25,7 @@ import {
 
 @ApiTags('Strapi - Tabs Menu')
 @ApiBearerAuth()
-@Throttle({ default: { ttl: 60000, limit: 30 } })
+@Throttle({ default: { ttl: 60000, limit: 200 } })
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(CacheInterceptor)
 @Controller('strapi/tabs-menu')
