@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.5](https://github.com/hadiazb/claude-demo-back/compare/v0.4.4...v0.4.5) (2026-02-11)
+
+
+### 🐛 Bug Fixes
+
+* **strapi:** handle dynamic webhook payload with @Allow() validators ([9c24bd3](https://github.com/hadiazb/claude-demo-back/commit/9c24bd3cb1112ba6fbca2011540e2cb720bbb50e))
+
 ### [0.4.4](https://github.com/hadiazb/claude-demo-back/compare/v0.4.3...v0.4.4) (2026-02-11)
 
 
