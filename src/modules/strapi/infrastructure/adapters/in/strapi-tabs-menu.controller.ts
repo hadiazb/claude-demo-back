@@ -23,6 +23,12 @@ import {
   StrapiTabsMenuQueryDto,
 } from '@strapi/application/dto';
 
+/**
+ * REST controller for Strapi tabs menu operations.
+ * Provides endpoints for retrieving tabs menu items with filtering support.
+ * Protected by JWT authentication with Redis caching and rate limiting.
+ * @route /strapi/tabs-menu
+ */
 @ApiTags('Strapi - Tabs Menu')
 @ApiBearerAuth()
 @Throttle({ default: { ttl: 60000, limit: 200 } })
@@ -30,10 +36,19 @@ import {
 @UseInterceptors(CacheInterceptor)
 @Controller('strapi/tabs-menu')
 export class StrapiTabsMenuController {
+  /**
+   * Creates a new StrapiTabsMenuController instance.
+   * @param strapiTabsMenuService - The service for tabs menu operations
+   */
   constructor(private readonly strapiTabsMenuService: StrapiTabsMenuService) {}
 
+  /**
+   * Retrieves all tabs menu items with optional locale, country, and menu type filters.
+   * @param query - Query parameters for filtering results
+   * @returns Promise resolving to an array of StrapiTabsMenuResponseDto
+   */
   @Get()
-  @Cacheable({ key: 'strapi:tabs-menu:all', ttl: 300 })
+  @Cacheable({ key: 'strapi:tabs-menu:all', ttl: 86400 })
   @ApiOperation({ summary: 'Get all Strapi tabs menu items' })
   @ApiResponse({
     status: 200,
@@ -47,8 +62,15 @@ export class StrapiTabsMenuController {
     return items.map((item) => StrapiTabsMenuResponseDto.fromDomain(item));
   }
 
+  /**
+   * Retrieves a single tabs menu item by its numeric identifier.
+   * @param id - The numeric ID of the tabs menu item
+   * @param query - Query parameters for filtering results
+   * @returns Promise resolving to the matching StrapiTabsMenuResponseDto
+   * @throws NotFoundException if no tabs menu item matches the given ID
+   */
   @Get(':id')
-  @Cacheable({ key: 'strapi:tabs-menu:one', ttl: 300 })
+  @Cacheable({ key: 'strapi:tabs-menu:one', ttl: 86400 })
   @ApiOperation({ summary: 'Get a Strapi tabs menu item by ID' })
   @ApiParam({ name: 'id', description: 'Tabs menu item numeric ID' })
   @ApiResponse({

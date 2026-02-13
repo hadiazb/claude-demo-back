@@ -22,6 +22,12 @@ import {
   StrapiQueryDto,
 } from '@strapi/application/dto';
 
+/**
+ * REST controller for Strapi module operations.
+ * Provides endpoints for retrieving modules by various criteria.
+ * Protected by JWT authentication with Redis caching and rate limiting.
+ * @route /strapi/modules
+ */
 @ApiTags('Strapi - Modules')
 @ApiBearerAuth()
 @Throttle({ default: { ttl: 60000, limit: 200 } })
@@ -29,10 +35,19 @@ import {
 @UseInterceptors(CacheInterceptor)
 @Controller('strapi/modules')
 export class StrapiModuleController {
+  /**
+   * Creates a new StrapiModuleController instance.
+   * @param strapiModuleService - The service for Strapi module operations
+   */
   constructor(private readonly strapiModuleService: StrapiModuleService) {}
 
+  /**
+   * Retrieves all Strapi modules with optional locale and country filters.
+   * @param query - Query parameters for filtering results
+   * @returns Promise resolving to an array of StrapiModuleResponseDto
+   */
   @Get()
-  @Cacheable({ key: 'strapi:modules:all', ttl: 300 })
+  @Cacheable({ key: 'strapi:modules:all', ttl: 86400 })
   @ApiOperation({ summary: 'Get all Strapi modules' })
   @ApiResponse({
     status: 200,
@@ -46,8 +61,15 @@ export class StrapiModuleController {
     return modules.map((m) => StrapiModuleResponseDto.fromDomain(m));
   }
 
+  /**
+   * Retrieves a single Strapi module by its module name.
+   * @param moduleName - The name identifier of the module
+   * @param query - Query parameters for filtering results
+   * @returns Promise resolving to the matching StrapiModuleResponseDto
+   * @throws NotFoundException if no module matches the given name
+   */
   @Get('by-name/:moduleName')
-  @Cacheable({ key: 'strapi:modules:by-name', ttl: 300 })
+  @Cacheable({ key: 'strapi:modules:by-name', ttl: 86400 })
   @ApiOperation({ summary: 'Get a Strapi module by module name' })
   @ApiParam({ name: 'moduleName', description: 'Module name' })
   @ApiResponse({
@@ -67,8 +89,15 @@ export class StrapiModuleController {
     return StrapiModuleResponseDto.fromDomain(module);
   }
 
+  /**
+   * Retrieves a single Strapi module by its document identifier.
+   * @param documentId - The Strapi document ID of the module
+   * @param query - Query parameters for filtering results
+   * @returns Promise resolving to the matching StrapiModuleResponseDto
+   * @throws NotFoundException if no module matches the given document ID
+   */
   @Get(':documentId')
-  @Cacheable({ key: 'strapi:modules:one', ttl: 300 })
+  @Cacheable({ key: 'strapi:modules:one', ttl: 86400 })
   @ApiOperation({ summary: 'Get a Strapi module by document ID' })
   @ApiParam({ name: 'documentId', description: 'Strapi document ID' })
   @ApiResponse({
