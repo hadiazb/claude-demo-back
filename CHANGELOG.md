@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.9](https://github.com/hadiazb/claude-demo-back/compare/v0.4.8...v0.4.9) (2026-02-13)
+
+
+### 📚 Documentation
+
+* **strapi:** add JSDoc documentation to all module files ([ed6103d](https://github.com/hadiazb/claude-demo-back/commit/ed6103d1752942c490e28080fe9a5d438fd936e3))
+
 ### [0.4.8](https://github.com/hadiazb/claude-demo-back/compare/v0.4.7...v0.4.8) (2026-02-11)
 
 
