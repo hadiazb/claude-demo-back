@@ -18,6 +18,12 @@ import {
 import { strapiProviders } from '@strapi/infrastructure/providers';
 import { WebhookSecretGuard } from '@strapi/infrastructure/guards/webhook-secret.guard';
 
+/**
+ * NestJS module for the Strapi CMS integration.
+ * Configures controllers, services, repository adapters, and dependency injection
+ * for Module, Tabs Menu, About Me Menu, and Webhook features.
+ * Imports AuthModule for JWT authentication support.
+ */
 @Module({
   imports: [AuthModule],
   controllers: [

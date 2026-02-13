@@ -6,6 +6,10 @@ import {
   StrapiAboutMeMenuRepositoryAdapter,
 } from '@strapi/infrastructure/adapters';
 
+/**
+ * Dependency injection providers for the Strapi module.
+ * Binds repository port tokens to their infrastructure adapter implementations.
+ */
 export const strapiProviders: Provider[] = [
   {
     provide: INJECTION_TOKENS.STRAPI_MODULE_REPOSITORY,
