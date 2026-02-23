@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.10](https://github.com/hadiazb/claude-demo-back/compare/v0.4.9...v0.4.10) (2026-02-23)
+
+
+### ✅ Tests
+
+* add integration tests for all modules (88 tests, 9 suites) ([342d337](https://github.com/hadiazb/claude-demo-back/commit/342d3375d6b8f00afa4462ca0b02efbc3639a6c1))
+
 ### [0.4.9](https://github.com/hadiazb/claude-demo-back/compare/v0.4.8...v0.4.9) (2026-02-13)
 
 
