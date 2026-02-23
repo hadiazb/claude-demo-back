@@ -195,16 +195,63 @@ src/shared/
 
 ## Testing
 
-- **Tests unitarios**: `npm run test:unit`
-- **Tests de integración**: `npm run test:integration`
+- **Tests unitarios**: `npm run test:unit` (925 tests, 51 suites)
+- **Tests de integración**: `npm run test:integration` (88 tests, 9 suites)
 - **Tests e2e**: `npm run test:e2e`
 - **Todos los tests**: `npm run test`
 - **Coverage**: `npm run test:cov`
 - **Coverage mínimo**: 70% (statements, branches, functions, lines)
-- **Ubicación**: `test/unit/` siguiendo la estructura de `src/`
-- **Fixtures**: `test/fixtures/` (datos de prueba)
-- **Mocks**: `test/mocks/` (logger, repository, services)
-- **Helpers**: `test/helpers/` (database, test app)
+
+### Estructura de tests
+
+```
+test/
+├── fixtures/                  # Datos de prueba (user.fixture.ts, auth.fixture.ts)
+├── mocks/                     # Mocks reutilizables (logger, repository, services)
+├── helpers/                   # Utilidades (database, test app)
+├── unit/                      # Tests unitarios (espejo de src/)
+├── integration/               # Tests de integración
+│   ├── modules/
+│   │   ├── users/
+│   │   │   ├── infrastructure/   # UserRepositoryAdapter + TypeORM mock
+│   │   │   └── application/      # UserService + UserRepositoryAdapter real
+│   │   ├── auth/
+│   │   │   ├── infrastructure/   # TokenRepositoryAdapter + TypeORM mock
+│   │   │   └── application/      # AuthService + cadena completa (JwtService real)
+│   │   └── strapi/
+│   │       ├── infrastructure/   # 3 Repository Adapters + HttpClient mock
+│   │       └── application/      # 3 Services + Adapters reales
+│   └── shared/
+│       └── http-client/          # AxiosHttpClientAdapter + axios mock
+└── e2e/                       # Tests end-to-end
+```
+
+### Tests de integración - Enfoque
+
+Los tests de integración verifican la **interacción entre capas** (Service + Repository Adapter) usando `@nestjs/testing` `TestingModule`. No requieren base de datos real ni servicios externos.
+
+**Patrón:** Se inyectan los adapters reales (ej: `UserRepositoryAdapter`) pero se mockean las dependencias de infraestructura (ej: TypeORM `Repository`, `HttpClientPort`). Esto testea el mapeo Domain ↔ ORM/API y la integración entre Service y Adapter.
+
+| Suite | Archivo | Tests | Qué verifica |
+|-------|---------|-------|--------------|
+| User Repository | `users/infrastructure/user-repository.integration.spec.ts` | 11 | CRUD, mapeo ORM↔Domain, normalización email |
+| User Service | `users/application/user-service.integration.spec.ts` | 9 | Creación con Value Objects, reglas de negocio (roles) |
+| Token Repository | `auth/infrastructure/token-repository.integration.spec.ts` | 6 | Persistencia y revocación de refresh tokens |
+| Auth Service | `auth/application/auth-service.integration.spec.ts` | 10 | Flujo completo: register, login, refresh, logout |
+| Strapi Module Repo | `strapi/infrastructure/strapi-module-repository.integration.spec.ts` | 7 | HTTP→Mapper→Domain, filtro country con `includes()` |
+| Strapi TabsMenu Repo | `strapi/infrastructure/strapi-tabs-menu-repository.integration.spec.ts` | 8 | Filtro country `===`, menuType, findById |
+| Strapi AboutMe Repo | `strapi/infrastructure/strapi-about-me-menu-repository.integration.spec.ts` | 8 | Análogo a TabsMenu |
+| Strapi Services | `strapi/application/strapi-services.integration.spec.ts` | 13 | 3 services delegando a adapters, NotFoundException |
+| Axios HTTP Client | `shared/http-client/axios-http-client.integration.spec.ts` | 5 | GET/POST, retry 5xx, no retry 4xx |
+
+### Configuración de Jest
+
+- **Unit**: `test/jest.unit.config.ts` - testMatch: `test/unit/**/*.spec.ts`
+- **Integration**: `test/jest.integration.config.ts` - testMatch: `test/integration/**/*.integration.spec.ts`
+- **E2E**: `test/jest.e2e.config.ts`
+- **Path aliases**: `@users`, `@auth`, `@strapi`, `@shared`, `@config`, `@/`
+- **Timeout**: 30s para integración y e2e
+- **Setup**: `test/setup.ts` (limpia mocks en `beforeEach`)
 
 ## Comandos Útiles
 
