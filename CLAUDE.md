@@ -197,7 +197,7 @@ src/shared/
 
 - **Tests unitarios**: `npm run test:unit` (925 tests, 51 suites)
 - **Tests de integración**: `npm run test:integration` (88 tests, 9 suites)
-- **Tests e2e**: `npm run test:e2e`
+- **Tests e2e**: `npm run test:e2e` (58 tests, 6 suites)
 - **Todos los tests**: `npm run test`
 - **Coverage**: `npm run test:cov`
 - **Coverage mínimo**: 70% (statements, branches, functions, lines)
@@ -206,9 +206,10 @@ src/shared/
 
 ```
 test/
-├── fixtures/                  # Datos de prueba (user.fixture.ts, auth.fixture.ts)
+├── fixtures/                  # Datos de prueba (user.fixture.ts, auth.fixture.ts, strapi.fixture.ts)
 ├── mocks/                     # Mocks reutilizables (logger, repository, services)
-├── helpers/                   # Utilidades (database, test app)
+├── helpers/                   # Utilidades (database, test app, auth helper)
+│   └── mocks/                 # Mocks in-memory para e2e (repos, cache, logger, email, http-client)
 ├── unit/                      # Tests unitarios (espejo de src/)
 ├── integration/               # Tests de integración
 │   ├── modules/
@@ -223,7 +224,7 @@ test/
 │   │       └── application/      # 3 Services + Adapters reales
 │   └── shared/
 │       └── http-client/          # AxiosHttpClientAdapter + axios mock
-└── e2e/                       # Tests end-to-end
+└── e2e/                       # Tests end-to-end (supertest + app NestJS real)
 ```
 
 ### Tests de integración - Enfoque
@@ -244,11 +245,59 @@ Los tests de integración verifican la **interacción entre capas** (Service + R
 | Strapi Services | `strapi/application/strapi-services.integration.spec.ts` | 13 | 3 services delegando a adapters, NotFoundException |
 | Axios HTTP Client | `shared/http-client/axios-http-client.integration.spec.ts` | 5 | GET/POST, retry 5xx, no retry 4xx |
 
+### Tests E2E - Enfoque
+
+Los tests e2e verifican el **flujo completo HTTP** (request → Controller → Guard → Pipe → Service → Adapter → Mock) usando `supertest` contra una app NestJS real con infraestructura mockeada (sin PostgreSQL, Redis, ni servicios externos).
+
+**Estrategia:** Se importa `AppModule` real y se overridean los providers de infraestructura con implementaciones in-memory. Se mantienen reales: Controllers, Guards (JWT, Roles, Webhook), ValidationPipe, Services, JwtService, JwtStrategy, ResponseInterceptor, HttpExceptionFilter.
+
+**Overrides de providers:**
+
+| Provider | Override | Descripción |
+|----------|----------|-------------|
+| `DataSource` | Mock vacío | Evita conexión PostgreSQL |
+| `UserOrmEntity` repo | Mock vacío | TypeORM repository no usado |
+| `RefreshTokenOrmEntity` repo | Mock vacío | TypeORM repository no usado |
+| `RedisCacheAdapter` | `InMemoryCacheAdapter` | Map en memoria, evita Redis |
+| `INJECTION_TOKENS.CACHE` | `InMemoryCacheAdapter` | Cache en memoria |
+| `INJECTION_TOKENS.USER_REPOSITORY` | `InMemoryUserRepository` | Array en memoria |
+| `INJECTION_TOKENS.TOKEN_REPOSITORY` | `InMemoryTokenRepository` | Array en memoria |
+| `INJECTION_TOKENS.EMAIL` | jest spy | Sin envío real de email |
+| `INJECTION_TOKENS.HTTP_CLIENT` | jest spy configurable | Para simular Strapi API |
+| `INJECTION_TOKENS.LOGGER` | jest spy silencioso | `setContext()` retorna `this` |
+| `ThrottlerStorage` (Symbol) | Mock `{totalHits: 0}` | Desactiva rate limiting |
+
+**Archivos clave:**
+
+| Archivo | Descripción |
+|---------|-------------|
+| `test/helpers/test-app.helper.ts` | `createE2eTestApp()` con todos los overrides |
+| `test/helpers/auth.e2e-helper.ts` | `registerUser()`, `loginUser()`, `authHeader()` |
+| `test/helpers/mocks/` | Implementaciones in-memory (repos, cache, logger, email, http-client) |
+| `test/fixtures/strapi.fixture.ts` | Fixtures con datos Strapi simulados |
+
+| Suite | Archivo | Tests | Qué verifica |
+|-------|---------|-------|--------------|
+| Auth | `auth.e2e-spec.ts` | 19 | Register, login, refresh, logout, logout-all, flujo completo, validaciones, 409 duplicado |
+| Users | `users.e2e-spec.ts` | 12 | GET/PATCH /me, GET /users (admin), GET /:id, PATCH /:id/role (promover, 403 auto-cambio, 403 último admin) |
+| Strapi Modules | `strapi-modules.e2e-spec.ts` | 8 | Listar, filtrar country/locale, buscar por nombre/documentId, 404, 401 |
+| Strapi Tabs Menu | `strapi-tabs-menu.e2e-spec.ts` | 6 | Listar, filtrar country/menuType, buscar por ID, 404, 401 |
+| Strapi About Me Menu | `strapi-about-me-menu.e2e-spec.ts` | 6 | Análogo a Tabs Menu |
+| Strapi Webhook | `strapi-webhook.e2e-spec.ts` | 7 | Cache invalidation con secret, deleteByPattern, timestamp, 401 sin/con secret incorrecto |
+
+**Notas importantes para los tests e2e:**
+- `ResponseInterceptor` y `HttpExceptionFilter` se aplican manualmente via `app.useGlobalInterceptors()` / `app.useGlobalFilters()` (como en `main.ts`)
+- Todas las respuestas exitosas están envueltas en `{ success, statusCode, message, data, timestamp, path }`
+- AuthController: `register` devuelve 201, `login/refresh/logout/logout-all` devuelven 200 (`@HttpCode`)
+- Webhook POST devuelve 201 (default), GET devuelve 200
+- Para crear admin en tests, se usa `createDirectAdmin()` que modifica el rol directamente en `InMemoryUserRepository` y re-logea
+- `testApp.reset()` limpia repos, cache y mocks entre tests
+
 ### Configuración de Jest
 
 - **Unit**: `test/jest.unit.config.ts` - testMatch: `test/unit/**/*.spec.ts`
 - **Integration**: `test/jest.integration.config.ts` - testMatch: `test/integration/**/*.integration.spec.ts`
-- **E2E**: `test/jest.e2e.config.ts`
+- **E2E**: `test/jest.e2e.config.ts` - testMatch: `test/e2e/**/*.e2e-spec.ts`
 - **Path aliases**: `@users`, `@auth`, `@strapi`, `@shared`, `@config`, `@/`
 - **Timeout**: 30s para integración y e2e
 - **Setup**: `test/setup.ts` (limpia mocks en `beforeEach`)

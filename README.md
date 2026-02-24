@@ -215,9 +215,12 @@ claude-initial-demo/
 │   └── main.ts               # Entry point
 ├── test/
 │   ├── unit/                 # Unit tests (mirrors src/ structure)
-│   ├── fixtures/             # Test data (auth, user fixtures)
-│   ├── helpers/              # Test helpers (database, test app)
-│   ├── mocks/                # Mocks (logger, repository, services)
+│   ├── integration/          # Integration tests (service + adapter)
+│   ├── e2e/                  # E2E tests (full HTTP flow with supertest)
+│   ├── fixtures/             # Test data (auth, user, strapi fixtures)
+│   ├── helpers/              # Test helpers (test app, auth helper)
+│   │   └── mocks/            # In-memory mocks for e2e (repos, cache, logger, email, http)
+│   ├── mocks/                # Mocks for unit/integration (logger, repository, services)
 │   ├── jest.unit.config.ts   # Unit test configuration
 │   ├── jest.integration.config.ts # Integration test configuration
 │   ├── jest.e2e.config.ts    # E2E test configuration
@@ -585,11 +588,25 @@ Swagger supports JWT authentication — use the "Authorize" button to set your B
 
 Tests are located in the `test/` directory with separate configurations for each level:
 
-| Level | Config | Command | Location |
-|-------|--------|---------|----------|
-| Unit | `jest.unit.config.ts` | `npm run test:unit` | `test/unit/` |
-| Integration | `jest.integration.config.ts` | `npm run test:integration` | `test/integration/` |
-| E2E | `jest.e2e.config.ts` | `npm run test:e2e` | `test/e2e/` |
+| Level | Config | Command | Location | Tests |
+|-------|--------|---------|----------|-------|
+| Unit | `jest.unit.config.ts` | `npm run test:unit` | `test/unit/` | 925 |
+| Integration | `jest.integration.config.ts` | `npm run test:integration` | `test/integration/` | 88 |
+| E2E | `jest.e2e.config.ts` | `npm run test:e2e` | `test/e2e/` | 58 |
+
+```bash
+# Run all tests
+npm run test
+
+# Run only unit tests
+npm run test:unit
+
+# Run only integration tests
+npm run test:integration
+
+# Run only e2e tests
+npm run test:e2e
+```
 
 ### Coverage
 
@@ -600,11 +617,27 @@ Minimum coverage threshold: **70%** (statements, branches, functions, lines).
 npm run test:cov
 ```
 
+### E2E Tests
+
+End-to-end tests verify the full HTTP flow (request → Controller → Guard → Pipe → Service → Adapter → Mock) using `supertest` against a real NestJS application with mocked infrastructure. No PostgreSQL, Redis, or external services are required.
+
+**Strategy:** The real `AppModule` is imported and infrastructure providers are overridden with in-memory implementations. Controllers, Guards (JWT, Roles, Webhook), ValidationPipe, Services, JwtService, JwtStrategy, ResponseInterceptor, and HttpExceptionFilter remain real.
+
+| Suite | Tests | Description |
+|-------|-------|-------------|
+| Auth | 19 | Register, login, refresh, logout, logout-all, full flow, validations, 409 duplicate |
+| Users | 12 | GET/PATCH /me, GET /users (admin only), GET /:id, PATCH /:id/role (promote, self-change, last admin) |
+| Strapi Modules | 8 | List, filter by country/locale, find by name/documentId, 404, 401 |
+| Strapi Tabs Menu | 6 | List, filter by country/menuType, find by ID, 404, 401 |
+| Strapi About Me Menu | 6 | List, filter by country/menuType, find by ID, 404, 401 |
+| Strapi Webhook | 7 | Cache invalidation with secret, deleteByPattern, timestamp, 401 auth |
+
 ### Test Infrastructure
 
-- **Fixtures** (`test/fixtures/`): Reusable test data for auth and user entities
-- **Mocks** (`test/mocks/`): Mock implementations for logger, repositories, and services
-- **Helpers** (`test/helpers/`): Database and test app setup utilities
+- **Fixtures** (`test/fixtures/`): Reusable test data for auth, user, and Strapi entities
+- **Mocks** (`test/mocks/`): Mock implementations for logger, repositories, and services (unit/integration)
+- **E2E Mocks** (`test/helpers/mocks/`): In-memory implementations of repository ports, cache, logger, email, and HTTP client for e2e tests
+- **Helpers** (`test/helpers/`): Test app setup (`createE2eTestApp`), auth helpers (`registerUser`, `authHeader`), and database utilities
 
 ## Docker
 
