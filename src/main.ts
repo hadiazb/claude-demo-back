@@ -46,12 +46,15 @@ async function bootstrap() {
 
   const port = configService.get<number>('app.port') ?? 3000;
   const apiVersion = configService.get<string>('app.apiVersion') ?? 'v1';
-  const corsOrigin = configService.get<string>('app.corsOrigin') ?? '*';
+  const corsOriginRaw = configService.get<string>('app.corsOrigin') ?? '*';
+  const corsOrigin =
+    corsOriginRaw === '*' ? '*' : corsOriginRaw.split(',').map((o) => o.trim());
 
   app.enableCors({
     origin: corsOrigin,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
+    credentials: corsOrigin !== '*',
+    exposedHeaders: ['X-App-Version'],
   });
 
   app.useGlobalPipes(
