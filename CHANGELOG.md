@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.12](https://github.com/hadiazb/claude-demo-back/compare/v0.4.11...v0.4.12) (2026-02-27)
+
+
+### 🐛 Bug Fixes
+
+* **config:** configure CORS with specific origins and expose X-App-Version header ([3e3a439](https://github.com/hadiazb/claude-demo-back/commit/3e3a4398c05012f5d121721f5a5f1d3942ee9d66))
+
 ### [0.4.11](https://github.com/hadiazb/claude-demo-back/compare/v0.4.10...v0.4.11) (2026-02-24)
 
 
