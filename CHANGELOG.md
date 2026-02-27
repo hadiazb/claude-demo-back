@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.13](https://github.com/hadiazb/claude-demo-back/compare/v0.4.12...v0.4.13) (2026-02-27)
+
+
+### 🐛 Bug Fixes
+
+* **config:** move X-App-Version header to Express middleware for all responses ([3a2d3c6](https://github.com/hadiazb/claude-demo-back/commit/3a2d3c63694cee3e4cb195c90c8de0d23c27cadc))
+
 ### [0.4.12](https://github.com/hadiazb/claude-demo-back/compare/v0.4.11...v0.4.12) (2026-02-27)
 
 
