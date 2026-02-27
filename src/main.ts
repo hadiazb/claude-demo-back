@@ -43,6 +43,18 @@ async function bootstrap() {
   app.use(helmet());
 
   const configService = app.get(ConfigService);
+  const appVersion = configService.get<string>('app.appVersion', '0.0.0');
+
+  app.use(
+    (
+      _req: unknown,
+      res: { setHeader: (k: string, v: string) => void },
+      next: () => void,
+    ) => {
+      res.setHeader('X-App-Version', appVersion);
+      next();
+    },
+  );
 
   const port = configService.get<number>('app.port') ?? 3000;
   const apiVersion = configService.get<string>('app.apiVersion') ?? 'v1';
@@ -54,7 +66,7 @@ async function bootstrap() {
     origin: corsOrigin,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: corsOrigin !== '*',
-    exposedHeaders: ['X-App-Version'],
+    exposedHeaders: ['X-App-Version', 'X-Request-Id'],
   });
 
   app.useGlobalPipes(
