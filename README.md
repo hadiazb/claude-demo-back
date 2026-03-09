@@ -18,6 +18,7 @@ REST API built with NestJS following Clean Architecture (Hexagonal Architecture)
 - [Available Scripts](#available-scripts)
 - [Testing](#testing)
 - [Docker](#docker)
+- [CI/CD](#cicd)
 - [Contributing](#contributing)
 
 ## Description
@@ -659,6 +660,49 @@ docker compose down -v
 # Restart containers
 docker compose restart
 ```
+
+## CI/CD
+
+This project uses **GitHub Actions** to run automated checks before merging to `main`.
+
+### Workflow
+
+The CI pipeline (`.github/workflows/ci.yml`) runs on:
+- **Pull requests** targeting `main`
+- **Pushes** to `develop`
+
+It executes the following steps in order:
+
+| Step | Command | Description |
+|------|---------|-------------|
+| Lint | `npm run lint` | ESLint check |
+| Unit tests | `npm run test:unit` | 925 tests |
+| Integration tests | `npm run test:integration` | 88 tests |
+| E2E tests | `npm run test:e2e` | 58 tests |
+
+### Branch Protection
+
+The `main` branch requires the **lint-and-test** check to pass before merging. This ensures no code reaches production without passing lint and all test suites.
+
+### Required GitHub Secrets
+
+The workflow requires the following secrets configured in GitHub → Settings → Secrets and variables → Actions:
+
+| Secret | Description |
+|--------|-------------|
+| `JWT_ACCESS_SECRET` | JWT access token secret |
+| `JWT_REFRESH_SECRET` | JWT refresh token secret |
+| `DB_HOST` | Database host |
+| `DB_PORT` | Database port |
+| `DB_USERNAME` | Database username |
+| `DB_PASSWORD` | Database password |
+| `DB_NAME` | Database name |
+| `STRAPI_WEBHOOK_SECRET` | Strapi webhook secret |
+| `STRAPI_API_TOKEN` | Strapi API token |
+| `STRAPI_MODULE_REPOSITORY` | Strapi API base URL |
+| `REDIS_URL` | Redis connection URL |
+
+> **Note:** All tests use in-memory mocks, so these secrets can be dummy values for CI (e.g., `ci-test-secret`, `localhost`, `5432`).
 
 ## Contributing
 
