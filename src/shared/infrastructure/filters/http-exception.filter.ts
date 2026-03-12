@@ -31,6 +31,11 @@ const THROTTLE_CONFIG: Record<string, { ttl: number; message: string }> = {
     message:
       'Demasiadas solicitudes de refresh token. Intenta de nuevo en 1 minuto.',
   },
+  '/strapi/': {
+    ttl: 60,
+    message:
+      'Demasiadas solicitudes de contenido. Intenta de nuevo en 1 minuto.',
+  },
   default: {
     ttl: 60,
     message: 'Demasiadas solicitudes. Intenta de nuevo en 1 minuto.',
@@ -141,7 +146,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response: Response,
   ): void {
     const endpoint = this.getThrottleEndpoint(request.url);
-    const config = THROTTLE_CONFIG[endpoint] || THROTTLE_CONFIG['default'];
+    const config =
+      THROTTLE_CONFIG[endpoint] ||
+      this.findThrottleConfigByPrefix(endpoint) ||
+      THROTTLE_CONFIG['default'];
 
     const errorResponse: ApiErrorResponse = {
       success: false,
@@ -184,6 +192,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
    * @param message - The error message string to parse
    * @returns An ApiFieldError object containing the field name and error message
    */
+  private findThrottleConfigByPrefix(
+    endpoint: string,
+  ): { ttl: number; message: string } | undefined {
+    const prefixKey = Object.keys(THROTTLE_CONFIG).find(
+      (key) => key.endsWith('/') && endpoint.startsWith(key),
+    );
+    return prefixKey ? THROTTLE_CONFIG[prefixKey] : undefined;
+  }
+
   private parseFieldError(message: string): ApiFieldError {
     const parts = message.split(' ');
     const field = parts[0] || 'unknown';

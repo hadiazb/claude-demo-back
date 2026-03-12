@@ -11,6 +11,7 @@ import {
   emailConfig,
   cacheConfig,
   strapiConfig,
+  throttleConfig,
 } from '@config';
 import {
   LoggingModule,
@@ -36,31 +37,41 @@ const envFile = `environment/.env.${process.env.APP_ENV || 'dev'}`;
         emailConfig,
         cacheConfig,
         strapiConfig,
+        throttleConfig,
       ],
       envFilePath: envFile,
     }),
-    ThrottlerModule.forRoot([
-      {
-        name: 'default',
-        ttl: 60000,
-        limit: 200,
-      },
-      {
-        name: 'login',
-        ttl: 300000,
-        limit: 10,
-      },
-      {
-        name: 'register',
-        ttl: 600000,
-        limit: 10,
-      },
-      {
-        name: 'refresh',
-        ttl: 60000,
-        limit: 30,
-      },
-    ]),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => [
+        {
+          name: 'default',
+          ttl: configService.getOrThrow<number>('throttle.default.ttl'),
+          limit: configService.getOrThrow<number>('throttle.default.limit'),
+        },
+        {
+          name: 'login',
+          ttl: configService.getOrThrow<number>('throttle.login.ttl'),
+          limit: configService.getOrThrow<number>('throttle.login.limit'),
+        },
+        {
+          name: 'register',
+          ttl: configService.getOrThrow<number>('throttle.register.ttl'),
+          limit: configService.getOrThrow<number>('throttle.register.limit'),
+        },
+        {
+          name: 'refresh',
+          ttl: configService.getOrThrow<number>('throttle.refresh.ttl'),
+          limit: configService.getOrThrow<number>('throttle.refresh.limit'),
+        },
+        {
+          name: 'strapi',
+          ttl: configService.getOrThrow<number>('throttle.strapi.ttl'),
+          limit: configService.getOrThrow<number>('throttle.strapi.limit'),
+        },
+      ],
+      inject: [ConfigService],
+    }),
     LoggingModule,
     HttpClientModule,
     EmailModule,
