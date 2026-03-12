@@ -30,7 +30,7 @@ import {
  */
 @ApiTags('Strapi - Modules')
 @ApiBearerAuth()
-@Throttle({ default: { ttl: 60000, limit: 200 } })
+@Throttle({ strapi: { ttl: 60000, limit: 500 } })
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(CacheInterceptor)
 @Controller('strapi/modules')

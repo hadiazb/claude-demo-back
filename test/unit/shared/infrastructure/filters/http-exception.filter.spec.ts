@@ -698,6 +698,55 @@ describe('HttpExceptionFilter', () => {
       );
     });
 
+    it('should handle ThrottlerException for strapi modules endpoint', () => {
+      mockRequest = createMockRequest({ url: '/api/v1/strapi/modules' });
+      mockArgumentsHost = createMockArgumentsHost(mockRequest, mockResponse);
+      const exception = new ThrottlerException();
+
+      filter.catch(exception, mockArgumentsHost);
+
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Retry-After', '60');
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'Demasiadas solicitudes de contenido. Intenta de nuevo en 1 minuto.',
+          retryAfter: 60,
+        }),
+      );
+    });
+
+    it('should handle ThrottlerException for strapi tabs-menu endpoint', () => {
+      mockRequest = createMockRequest({ url: '/api/v1/strapi/tabs-menu' });
+      mockArgumentsHost = createMockArgumentsHost(mockRequest, mockResponse);
+      const exception = new ThrottlerException();
+
+      filter.catch(exception, mockArgumentsHost);
+
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'Demasiadas solicitudes de contenido. Intenta de nuevo en 1 minuto.',
+        }),
+      );
+    });
+
+    it('should handle ThrottlerException for strapi about-me-menu endpoint with ID', () => {
+      mockRequest = createMockRequest({
+        url: '/api/v1/strapi/about-me-menu/42',
+      });
+      mockArgumentsHost = createMockArgumentsHost(mockRequest, mockResponse);
+      const exception = new ThrottlerException();
+
+      filter.catch(exception, mockArgumentsHost);
+
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'Demasiadas solicitudes de contenido. Intenta de nuevo en 1 minuto.',
+        }),
+      );
+    });
+
     it('should handle URL with different API version', () => {
       /**
        * TEST: URL with different API version (/api/v2)
