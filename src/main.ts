@@ -85,32 +85,35 @@ async function bootstrap() {
 
   app.setGlobalPrefix(`api/${apiVersion}`);
 
-  // Swagger documentation setup
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Claude Demo API')
-    .setDescription('API documentation for the Claude Demo application')
-    .setVersion(apiVersion)
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter JWT token',
-        in: 'header',
-      },
-      'JWT-auth',
-    )
-    .addTag('Auth', 'Authentication endpoints')
-    .addTag('Users', 'User management endpoints')
-    .build();
+  // Swagger documentation setup (disabled in production to save ~5-15 MB RAM)
+  const appEnv = process.env.APP_ENV || 'dev';
+  if (appEnv !== 'prod') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Claude Demo API')
+      .setDescription('API documentation for the Claude Demo application')
+      .setVersion(apiVersion)
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'JWT',
+          description: 'Enter JWT token',
+          in: 'header',
+        },
+        'JWT-auth',
+      )
+      .addTag('Auth', 'Authentication endpoints')
+      .addTag('Users', 'User management endpoints')
+      .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
-  });
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    });
+  }
 
   await app.listen(port);
 
@@ -119,8 +122,10 @@ async function bootstrap() {
   logger
     .setContext('Bootstrap')
     .info(`Application is running on: ${appUrl}/api/${apiVersion}`);
-  logger
-    .setContext('Bootstrap')
-    .info(`Swagger docs available at: ${appUrl}/docs`);
+  if (appEnv !== 'prod') {
+    logger
+      .setContext('Bootstrap')
+      .info(`Swagger docs available at: ${appUrl}/docs`);
+  }
 }
 void bootstrap();
